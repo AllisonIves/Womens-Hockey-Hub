@@ -8,7 +8,7 @@ const App = () => {
         <Link to="/chat" className="text-blue-600">Chat</Link>
       </nav>
       <Routes>
-        <Route path="/chat" element={<Chat />} />  {/* Only the Chat route */}
+        <Route path="/chat" element={<Chat />} /> 
       </Routes>
     </Router>
   );
