@@ -4,19 +4,24 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [users, setUsers] = useState([]);
+  const [currentUser, setcurrentUsers] = useState(null);
 
   useEffect(() => {
-    // Fetch initial users and messages (placeholder for API calls)
-    setUsers(["Chris", "Allison", "Derek"]);
-    setMessages([
-      { user: "Chris", text: "Hello!" },
-      { user: "Allison", text: "Hi there!" }
-    ]);
+    
+    const fetchUsers = async() => {
+      const response = await etch("/api/user");
+      const data = await response.json();
+      setUsers(data);
+      
+      setcurrentUsers("User123");
+    };
+
+    fetchUsers();
   }, []);
 
   const sendMessage = () => {
     if (input.trim() === "") return;
-    setMessages([...messages, { user: "You", text: input }]);
+    setMessages([...messages, { user: "currentUser", text: input }]);
     setInput("");
   };
 
