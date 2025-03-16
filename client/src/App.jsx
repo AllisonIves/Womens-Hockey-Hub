@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import react, {useState} from "react";
 import CommunityEventPage from "./CommunityEventPage"; 
 import CommunityEventForm from "./CommunityEventForm.jsx";  
-import Chat from "./Chat.jsx";  
+import Chat from "./Pages/Chat.jsx";  
 const App = () => {
   const [view, setView] = useState("list");
 

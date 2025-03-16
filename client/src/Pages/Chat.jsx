@@ -6,7 +6,7 @@ function Chat() {
         transports: ['websocket'],
     });
 
-    //Initialize Use States
+    // Initialize State
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const messageEndRef = useRef(null);
@@ -14,47 +14,36 @@ function Chat() {
     const [isUsernameNull, setIsUsernameNull] = useState(true);
 
     useEffect(() => {
-        //Listen for messages
-        socket.on('new message', (message) => {
+        socket.on('receiveMessage', (message) => {
             setMessages((prevMessages) => [...prevMessages, message]);
         });
 
         return () => {
-            socket.off('new message');
+            socket.off('receiveMessage');
         };
-        }, []);
-    
-    //Handling for send message
+    }, []);
+
     const handleSendMessage = (e) => {
         e.preventDefault();
-        //Ensure message is not empty
         if (inputMessage.trim()) {
-            //Emit message
-            socket.emit('new message', {message: inputMessage, username });
-            //Revert the input
+            socket.emit('sendMessage', { message: inputMessage, username });
             setInputMessage('');
         }
     };
 
-    
-    //Handling for change of input (typing the message)
+    // Handle input change (typing message)
     const handleInputChange = (e) => {
         setInputMessage(e.target.value);
     };
 
-    //Handling for username submit
     const handleUsernameSubmit = (e) => {
         e.preventDefault();
-        //Ensure message is not empty
         if (username.trim()) {
-            //Set isUserNameNull boolean to false
             setIsUsernameNull(false);
+        }
     };
-}
-
 
     return (
-        //username selection (will be removed when user log in is implemented)
         <div className="chat-container">
             {isUsernameNull ? (
                 <div className="username-selection">
@@ -64,16 +53,15 @@ function Chat() {
                             type="text"
                             placeholder="Enter your username"
                             value={username}
-                            onChange={(e) => setUsername(e.target.value)} //set username value with change
+                            onChange={(e) => setUsername(e.target.value)}
                         />
                         <button type="submit">Enter Chat</button>
                     </form>
                 </div>
             ) : (
-                //Actual chat box
                 <div className="chat">
                     <h2>Chat</h2>
-                    <div className="messages"> 
+                    <div className="messages">
                         {messages.map((msg, index) => (
                             <div key={index} className="message">
                                 <strong>{msg.username}: </strong>{msg.message}
@@ -95,6 +83,5 @@ function Chat() {
         </div>
     );
 }
-
 
 export default Chat;
