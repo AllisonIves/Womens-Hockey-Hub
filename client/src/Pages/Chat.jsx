@@ -6,20 +6,28 @@ function Chat() {
         transports: ['websocket'],
     });
 
-    // Initialize State
+    //Initialize states
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const messageEndRef = useRef(null);
     const [username, setUsername] = useState('');
     const [isUsernameNull, setIsUsernameNull] = useState(true);
+    const [users, setUsers] = useState([]);
 
     useEffect(() => {
+        //Handle new messages
         socket.on('receiveMessage', (message) => {
             setMessages((prevMessages) => [...prevMessages, message]);
         });
 
+        //Update the connected users list
+        socket.on('userList', (userList) => {
+            setUsers(userList);
+        });
+
         return () => {
             socket.off('receiveMessage');
+            socket.off('userList');
         };
     }, []);
 
@@ -31,7 +39,7 @@ function Chat() {
         }
     };
 
-    // Handle input change (typing message)
+    //Handle input change (typing message)
     const handleInputChange = (e) => {
         setInputMessage(e.target.value);
     };
@@ -40,6 +48,7 @@ function Chat() {
         e.preventDefault();
         if (username.trim()) {
             setIsUsernameNull(false);
+            socket.emit('setUsername', username);
         }
     };
 
@@ -61,6 +70,14 @@ function Chat() {
             ) : (
                 <div className="chat">
                     <h2>Chat</h2>
+                    <div className="users">
+                        <h3>Connected Users:</h3>
+                        <ul>
+                            {users.map((user, index) => (
+                                <li key={index}>{user}</li>
+                            ))}
+                        </ul>
+                    </div>
                     <div className="messages">
                         {messages.map((msg, index) => (
                             <div key={index} className="message">
