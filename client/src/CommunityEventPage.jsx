@@ -14,7 +14,7 @@ const CommunityEventPage = () => {
         try {
             const response = await axios.get("http://localhost:5000/api/communityevent"); // ✅ Updated URL
             const approvedEvents = filterApprovedEvents(response.data); // ✅ Apply the filter
-            setEvents(approvedEvents); // ✅ Only set approved events
+            setEvents(approvedEvents); // Only set approved events
         } catch (err) {
             console.error("Error fetching events:", err);
             setError("Failed to load events. Please try again later.");
