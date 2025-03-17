@@ -37,4 +37,9 @@ router.put('/:id/approve', communityeventcon.approveEvent);
 // UPDATE event (supports image update)
 router.put('/:id', upload.single('photo'), communityeventcon.updateEvent);
 
+// Approve an Event
+router.put('/approve/:id', communityeventcon.approveEvent);
+
 module.exports = router;
+
+

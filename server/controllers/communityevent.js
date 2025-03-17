@@ -144,3 +144,20 @@ exports.updateEvent = async (req, res) => {
         res.status(500).json({ message: "Failed to update event", error: error.message });
     }
 };
+
+// Approve a specific event
+exports.approveEvent = async (req, res) => {
+    try {
+        const event = await Communityevent.findById(req.params.id);
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+
+        event.isApproved = true; // Set isApproved to true
+        await event.save();
+
+        res.status(200).json({ message: "Event approved successfully", event });
+    } catch (err) {
+        res.status(500).json({ message: "Error approving event", error: err.message });
+    }
+};
