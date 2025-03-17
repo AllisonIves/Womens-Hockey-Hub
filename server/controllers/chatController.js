@@ -11,10 +11,9 @@ module.exports = function(io) {
         //Handle new user joining
         socket.on('setUsername', (username) => {
             if (users.length < MAX_USERS) {
-                if (!users.includes(username)) {
-                    users.push(username);  //Add new jser
-                    socket.username = username;
-                }
+                users.push(username);  //Add new jser
+                socket.username = username;
+                
                 //Update userlist for all users
                 io.emit('userList', users);
             } else {
