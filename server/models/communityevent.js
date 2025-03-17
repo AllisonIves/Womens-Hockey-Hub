@@ -7,7 +7,7 @@ var thisSchema = new mongoose.Schema({
     description: String,
     isApproved: Boolean,
     userPosted: String,
-    photo: Image
+    photo: { type: String }
 
 });
 
