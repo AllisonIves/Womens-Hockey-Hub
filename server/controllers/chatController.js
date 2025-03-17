@@ -37,7 +37,7 @@ module.exports = function(io) {
             let containsBannedWord = bannedWords.some(word => message.includes(word));
 
             if (containsBannedWord) {
-                socket.emit('bannedWord', 'Your message contains a banned word. Try again.');
+                io.emit('bannedWord', 'Your message contains a banned word. Try again.');
             } else {
                 io.emit('receiveMessage', data); //Send message to all users if no banned words used
             }
