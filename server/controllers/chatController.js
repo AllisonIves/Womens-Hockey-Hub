@@ -1,6 +1,6 @@
 const fs = require('fs');
 const bannedWordsPath = 'bannedWords.json';
-// Load banned words from JSON file
+//Load banned words from JSON file
 const bannedWords = JSON.parse(fs.readFileSync(bannedWordsPath)).bannedWords;
 
 module.exports = function(io) {
@@ -28,21 +28,21 @@ module.exports = function(io) {
         });
 
         
-        //Handle message sending
-        socket.on('sendMessage', (data) => {
-            console.log('Received message:', data.message); //Log message for debugging
-            let message = data.message.toLowerCase();
-            
-            //Check if the message contains any banned words
-            let containsBannedWord = bannedWords.some(word => message.includes(word));
+       //Handle message sending
+       socket.on('sendMessage', (data) => {
+        let message = data.message.toLowerCase();
 
-            if (containsBannedWord) {
-                io.emit('bannedWord', 'Your message contains a banned word. Try again.');
-            } else {
-                io.emit('receiveMessage', data); //Send message to all users if no banned words used
-            }
-        });
-    
+        //Check if the message contains any banned words
+        let containsBannedWord = bannedWords.some(word => message.includes(word));
+
+        if (containsBannedWord) {
+            //Emit banned word
+            io.emit('bannedWord', 'Your message contains a banned word. Try again.');
+        } else {
+            //Send message to all other clients except the sender
+            socket.broadcast.emit('receiveMessage', data); 
+        }
+    });
         //Handle user disconnecting
         socket.on('disconnect', () => {
             //Remove the username from the list
@@ -50,5 +50,7 @@ module.exports = function(io) {
             io.emit('userList', users); //Update userlist for all users
             console.log('User disconnected:', socket.id);
         });
+
+        
     });
 };
