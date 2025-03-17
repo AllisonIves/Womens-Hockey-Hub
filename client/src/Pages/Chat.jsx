@@ -19,6 +19,10 @@ function Chat() {
         socket.on('receiveMessage', (message) => {
             setMessages((prevMessages) => [...prevMessages, message]);
         });
+        socket.on('alert', (message) => {
+            alert(message);  //Display the alert to the user
+            Console.log(message); //Log for debugging
+        });
 
         //Update the connected users list
         socket.on('userList', (userList) => {
@@ -28,6 +32,7 @@ function Chat() {
         return () => {
             socket.off('receiveMessage');
             socket.off('userList');
+            socket.off('alert');
         };
     }, []);
 

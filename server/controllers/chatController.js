@@ -1,3 +1,8 @@
+const fs = require('fs');
+
+// Load banned words from JSON file
+const bannedWords = JSON.parse(fs.readFileSync('bannedWords.json')).bannedWords;
+
 module.exports = function(io) {
     const MAX_USERS = 10; //Maximum users
     let users = []; //Array to track the users
@@ -21,9 +26,21 @@ module.exports = function(io) {
                 socket.disconnect();
             }
         });
+
+        
         //Handle message sending
         socket.on('sendMessage', (data) => {
-            io.emit('receiveMessage', data);
+            console.log('Received message:', data.message); //Log message for debugging
+            let message = data.message.toLowerCase();
+            
+            //Check if the message contains any banned words
+            let containsBannedWord = bannedWords.some(word => message.includes(word));
+
+            if (containsBannedWord) {
+                socket.emit('alert', 'Your message contains a banned word. Try again.');
+            } else {
+                io.emit('receiveMessage', data); //Send message to all users if no banned words used
+            }
         });
     
         //Handle user disconnecting
