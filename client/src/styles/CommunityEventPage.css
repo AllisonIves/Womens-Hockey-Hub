@@ -1,0 +1,154 @@
+/* WHH Color Variables */
+:root {
+    --WHH-Blue: #003049;
+    --WHH-Red: #c1121F;
+    --WHH-Light-Blue: #669BBC;
+    --WHH-Gray: #EBEDF0;
+}
+
+/* Main Events Container */
+.events-container {
+    max-width: 650px;
+    height: 80vh;
+    margin: 50px auto;
+    padding: 20px;
+    border: 2px solid var(--WHH-Blue);
+    border-radius: 10px;
+    background-color: var(--WHH-Gray);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    
+    /* Background Image */
+    background-image: url("../assets/Hockey.png");
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+/* Overlay to Keep Text Readable */
+.events-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 1;
+}
+
+/* Keeping things above the overlay */
+.events-container h1,
+.sorting-buttons,
+.event-list-container {
+    position: relative;
+    z-index: 2; 
+}
+
+/* Title */
+.events-title {
+    position: relative;
+    z-index: 2;
+    color: var(--WHH-Blue);
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+
+/* Sorting Buttons */
+.sorting-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+/* Sorting Button */
+.sort-button {
+    padding: 10px 15px;
+    border: none;
+    background-color: var(--WHH-Red);
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.sort-button:hover {
+    background-color: var(--WHH-Light-Blue);
+}
+
+/* Scrollable Events List */
+.event-list-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+    max-height: calc(80vh - 100px);
+}
+
+/* Event List - Stacked Layout */
+.event-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Individual Event Card */
+.event-card {
+    background-color: white;
+    border: 2px solid var(--WHH-Light-Blue);
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Event Image */
+.event-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* Event Name */
+.event-name {
+    font-size: 1.5rem;
+    color: var(--WHH-Blue);
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+/* Event Description */
+.event-description {
+    font-size: 1rem;
+    color: var(--WHH-Blue);
+    margin-bottom: 10px;
+}
+
+/* Event Details */
+.event-details {
+    font-size: 0.9rem;
+    color: var(--WHH-Blue);
+}
+
+/* Error & Loading Messages */
+.error-message {
+    color: var(--WHH-Red);
+    font-weight: bold;
+}
+
+.loading-message {
+    color: var(--WHH-Blue);
+    font-style: italic;
+}

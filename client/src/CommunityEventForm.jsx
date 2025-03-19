@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
+import "/src/styles/CommunityEventForm.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"; 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const CommunityEventForm = () => {
   const [eventData, setEventData] = useState({
@@ -9,8 +10,8 @@ const CommunityEventForm = () => {
     description: "",
     date: "",
     location: "",
-    photo: null, 
-    userPosted: "", 
+    photo: null,
+    userPosted: "",
   });
 
   const [preview, setPreview] = useState(null);
@@ -30,7 +31,7 @@ const CommunityEventForm = () => {
 
     setEventData((prevData) => ({
       ...prevData,
-      photo: file, 
+      photo: file,
     }));
 
     if (file) {
@@ -40,7 +41,7 @@ const CommunityEventForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage(""); // Clear previous errors
+    setErrorMessage("");
 
     try {
       const formData = new FormData();
@@ -48,8 +49,8 @@ const CommunityEventForm = () => {
       formData.append("description", eventData.description);
       formData.append("date", eventData.date);
       formData.append("location", eventData.location);
-      formData.append("photo", eventData.photo); 
-      formData.append("userPosted", eventData.userPosted); 
+      formData.append("photo", eventData.photo);
+      formData.append("userPosted", eventData.userPosted);
 
       console.log("Submitting form with:", Object.fromEntries(formData.entries())); // Debugging
 
@@ -73,7 +74,7 @@ const CommunityEventForm = () => {
   };
 
   return (
-    <div>
+    <div className="event-form-container">
       <h2>Submit Community Event</h2>
       <form onSubmit={handleSubmit}>
         <div>
@@ -95,7 +96,7 @@ const CommunityEventForm = () => {
         <div>
           <label>Image (Optional):</label>
           <input type="file" onChange={handleFileChange} />
-          {preview && <img src={preview} alt="Preview" width="100" />}
+          {preview && <img src={preview} alt="Preview" className="image-preview" />}
         </div>
         <div>
           <label>Your Name:</label>
@@ -107,7 +108,7 @@ const CommunityEventForm = () => {
             required
           />
         </div>
-        {errorMessage && <p className="text-red-500">{errorMessage}</p>} {/* Displays error */}
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
         <button type="submit">Submit Event</button>
       </form>
 
