@@ -3,11 +3,9 @@ import io from 'socket.io-client';
 import "../styles/chat.css";
 
 function Chat() {
-    const socket = io('http://localhost:5000', {
-        transports: ['websocket'],
-    });
 
-    // Initialize states
+    //Initialize states
+    const socket = useRef(null);
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const messageEndRef = useRef(null);
@@ -16,29 +14,46 @@ function Chat() {
     const [users, setUsers] = useState([]);
 
     const inactivityTimeout = useRef(null);
-
     useEffect(() => {
-        socket.on('receiveMessage', (message) => {
+        socket.current = io('http://localhost:5000');  //Initialize socket connection
+
+        //Receive message event
+        socket.current.on('receiveMessage', (message) => {
             setMessages((prevMessages) => [...prevMessages, message]);
         });
-
-        socket.on('userList', (userList) => {
+        //Updating user list
+        socket.current.on('userList', (userList) => {
             setUsers(userList);
         });
-
-        socket.on('bannedWord', (message) => {
+        //Banned word handling
+        socket.current.on('bannedWord', (message) => {
+            console.log('Received banned word message:', message);
             alert(message);
         });
+        //User limit handling (maximum users and repeat names)
+        socket.current.on('userLimit', (message) => {
+            console.log(message); //Debug log
+            alert(message);  //Alert the user
+            setIsUsernameNull(true);  //Reset the state to show the username inpyut again
+        });
 
+        socket.current.on('disconnect', () => {
+            console.log('Disconnected from server');
+            setIsUsernameNull(true);
+            setUsername('');
+            setMessages([]);
+        });
+        
         const resetInactivityTimer = () => {
             if (inactivityTimeout.current) {
                 clearTimeout(inactivityTimeout.current);
             }
             inactivityTimeout.current = setTimeout(() => {
-                console.log('You have been disconnected due to inactivity.');
-                socket.emit('disconnectUser');
+                socket.current.emit('disconnectUser');
+                socket.current.disconnect();
+                setIsUsernameNull(true); //Reset the state to show the username inpyut again
                 alert('You have been disconnected due to inactivity.');
-            }, 10 * 60 * 1000);
+            }, 10 * 60 * 1000); //10 minutes timer
         };
 
         const activityEvents = ['keydown', 'input'];
@@ -46,30 +61,23 @@ function Chat() {
             window.addEventListener(event, resetInactivityTimer);
         });
 
-        socket.on('disconnect', () => {
-            console.log('Disconnected from server');
-            setIsUsernameNull(true);
-            setUsername('');
-            setMessages([]);
-        });
 
         return () => {
+            socket.current.disconnect(); //Cleanup socket
             activityEvents.forEach((event) => {
                 window.removeEventListener(event, resetInactivityTimer);
             });
             if (inactivityTimeout.current) {
                 clearTimeout(inactivityTimeout.current);
             }
-            socket.off('receiveMessage');
-            socket.off('bannedWord');
-            socket.off('userList');
         };
     }, []);
 
     const handleSendMessage = (e) => {
         e.preventDefault();
         if (inputMessage.trim()) {
-            socket.emit('sendMessage', { message: inputMessage, username });
+            const messageData = { message: inputMessage, username };
+            socket.current.emit('sendMessage', messageData);
             setInputMessage('');
         }
     };
@@ -82,8 +90,20 @@ function Chat() {
         e.preventDefault();
         if (username.trim()) {
             setIsUsernameNull(false);
-            socket.emit('setUsername', username);
+            socket.current.emit('setUsername', username);
         }
+    };
+
+    //Handle disconnecting the current user
+    const handleDisconnectUser = () => {
+        socket.current.emit('disconnectUser');
+        socket.current.disconnect();
+        setIsUsernameNull(true); //Reset the state to show the username inpyut again
+    };
+
+    //Handle disconnecting all users (to be removed)
+    const handleDisconnectAllUsers = () => {
+        socket.current.emit('disconnectAll');
     };
 
     return (
@@ -146,6 +166,12 @@ function Chat() {
                             />
                             <button type="submit" className="send-button">Send</button>
                         </form>
+                    </div>
+
+                    {/* Disconnect Buttons */}
+                    <div className="disconnect-buttons">
+                        <button onClick={handleDisconnectUser}>Disconnect Me</button>
+                        <button onClick={handleDisconnectAllUsers}>Disconnect All Users</button>
                     </div>
                 </>
             )}
