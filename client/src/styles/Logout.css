@@ -1,0 +1,40 @@
+/* WHH Color Variables */
+:root {
+    --WHH-Blue: #003049;
+    --WHH-Red: #c1121F;
+    --WHH-Light-Blue: #669BBC;
+    --WHH-Gray: #EBEDF0;
+  }
+  
+  .logout-container {
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 30px;
+    border: 2px solid var(--WHH-Blue);
+    border-radius: 10px;
+    background-color: var(--WHH-Gray);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .logout-title {
+    color: var(--WHH-Blue);
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .logout-button {
+    padding: 10px 20px;
+    background-color: var(--WHH-Red);
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .logout-button:hover {
+    background-color: var(--WHH-Light-Blue);
+  }
+  
