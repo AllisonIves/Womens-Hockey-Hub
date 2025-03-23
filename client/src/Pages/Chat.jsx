@@ -12,6 +12,7 @@ function Chat() {
     const [username, setUsername] = useState('');
     const [isUsernameNull, setIsUsernameNull] = useState(true);
     const [users, setUsers] = useState([]);
+    const [roomName, setRoomName] = useState('');
 
     const inactivityTimeout = useRef(null);
     useEffect(() => {
@@ -21,20 +22,29 @@ function Chat() {
         socket.current.on('receiveMessage', (message) => {
             setMessages((prevMessages) => [...prevMessages, message]);
         });
+
         //Updating user list
         socket.current.on('userList', (userList) => {
             setUsers(userList);
         });
+
+        // Receive room name after joining
+        socket.current.on('roomJoined', (room) => {
+            console.log('Joined room:', room);
+            setRoomName(room);
+        });
+
         //Banned word handling
         socket.current.on('bannedWord', (message) => {
             console.log('Received banned word message:', message);
             alert(message);
         });
+
         //User limit handling (maximum users and repeat names)
         socket.current.on('userLimit', (message) => {
             console.log(message); //Debug log
             alert(message);  //Alert the user
-            setIsUsernameNull(true);  //Reset the state to show the username inpyut again
+            setIsUsernameNull(true);  //Reset the state to show the username input again
         });
 
         socket.current.on('disconnect', () => {
@@ -43,7 +53,7 @@ function Chat() {
             setUsername('');
             setMessages([]);
         });
-        
+
         const resetInactivityTimer = () => {
             if (inactivityTimeout.current) {
                 clearTimeout(inactivityTimeout.current);
@@ -51,7 +61,7 @@ function Chat() {
             inactivityTimeout.current = setTimeout(() => {
                 socket.current.emit('disconnectUser');
                 socket.current.disconnect();
-                setIsUsernameNull(true); //Reset the state to show the username inpyut again
+                setIsUsernameNull(true); //Reset the state to show the username input again
                 alert('You have been disconnected due to inactivity.');
             }, 10 * 60 * 1000); //10 minutes timer
         };
@@ -60,7 +70,6 @@ function Chat() {
         activityEvents.forEach((event) => {
             window.addEventListener(event, resetInactivityTimer);
         });
-
 
         return () => {
             socket.current.disconnect(); //Cleanup socket
@@ -98,7 +107,7 @@ function Chat() {
     const handleDisconnectUser = () => {
         socket.current.emit('disconnectUser');
         socket.current.disconnect();
-        setIsUsernameNull(true); //Reset the state to show the username inpyut again
+        setIsUsernameNull(true); //Reset the state to show the username input again
     };
 
     //Handle disconnecting all users (to be removed)
@@ -127,11 +136,13 @@ function Chat() {
                     <div className="chat-wrapper">
                         {/* Chat Box */}
                         <div className="chat-container">
-                            <h2>Chat</h2>
+                            <div className="chat-header">
+                                <h2>Chat</h2>
+                            </div>
                             <div className="messages">
                                 {messages.map((msg, index) => (
-                                    <div 
-                                        key={index} 
+                                    <div
+                                        key={index}
                                         className={`message ${msg.username === username ? "you" : "other"}`}
                                     >
                                         <strong>{msg.username}</strong>: {msg.message}
@@ -152,6 +163,11 @@ function Chat() {
                                 </ul>
                             </div>
                         </div>
+                    </div>
+
+                    {/* Room Info Below Chat */}
+                    <div className="room-info-visible">
+                        <p><strong>{roomName}</strong></p>
                     </div>
 
                     {/* Message Input Box */}
