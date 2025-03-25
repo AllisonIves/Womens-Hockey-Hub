@@ -9,6 +9,7 @@ const path = require('path');
 const projectRoutes = require('./routes/project');
 const communityEventRoutes = require('./routes/communityevent');
 const userRoutes = require('./routes/userRoutes');
+const newsRoutes = require('./routes/newsRoutes');
 
 // Initialize app and server
 const app = express();
@@ -42,6 +43,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/api/communityevent', communityEventRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/news', newsRoutes);
 
 // WebSocket for chat
 const chatController = require('./controllers/chatController');

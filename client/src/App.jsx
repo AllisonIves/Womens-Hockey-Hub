@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
+import News from "./Pages/News.jsx";
 import CommunityEventPage from "./CommunityEventPage";
 import CommunityEventForm from "./CommunityEventForm.jsx";
 import Chat from "./Pages/Chat.jsx";
@@ -60,6 +61,7 @@ const App = () => {
   return (
     <Router>
       <nav>
+        <Link to="/">News </Link>
         <Link to="/events">Community Events </Link>
         {firebaseUser && (
           <>
@@ -78,6 +80,7 @@ const App = () => {
       )}
 
       <Routes>
+        <Route path="/" element={<News />} />
         <Route path="/events" element={<CommunityEventPage />} />
         <Route
           path="/post-event"
