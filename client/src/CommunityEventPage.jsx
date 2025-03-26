@@ -9,6 +9,17 @@ const CommunityEventPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
+
+  const [openDropdown, setOpenDropdown] = useState(null); //Track if dropdown is open
+  
+  const toggleDropdown = (eventId) => {
+    if (openDropdown === eventId) {
+      setOpenDropdown(null); //Close if clicked again
+    } else {
+      setOpenDropdown(eventId); //Open dropdown for the event
+    }
+  };
+
   useEffect(() => {
     const fetchEvents = async () => {
         try {
@@ -59,7 +70,45 @@ const CommunityEventPage = () => {
                 <p className="event-description">{event.description}</p>
                 <p className="event-details"><strong>Date:</strong> {new Date(event.date).toDateString()}</p>
                 <p className="event-details"><strong>Location:</strong> {event.location}</p>
-              </li>
+                
+                 {/* Share Button */}
+                <button
+                  onClick={() => toggleDropdown(event._id)}
+                  className="share-button"
+                >
+                Share
+                </button>
+                
+            {/* Dropdown menu */}
+            {openDropdown === event._id && (
+              <div className="dropdown-menu">
+                {/* X Share */}
+                <a
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                    event.name
+                  )}&url=${encodeURIComponent(window.location.href)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="dropdown-item x"
+                >
+                  Share on X
+                </a>
+
+                {/* Facebook Share */}
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                    window.location.href
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="dropdown-item facebook"
+                >
+                  Share on Facebook
+                </a>
+              </div>
+            )}
+            </li>
+               
             ))}
           </ul>
         </div>
@@ -67,5 +116,4 @@ const CommunityEventPage = () => {
     </div>
   );
 };
-
 export default CommunityEventPage;
