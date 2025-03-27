@@ -6,6 +6,7 @@ import CommunityEventForm from "./CommunityEventForm.jsx";
 import Chat from "./Pages/Chat.jsx";
 import Login from "./Pages/Login.jsx";
 import Logout from "./Pages/Logout.jsx";
+import ContactForm from "./Pages/ContactForm";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "/src/firebase-config";
 
@@ -71,6 +72,7 @@ const App = () => {
           </>
         )}
         {!firebaseUser && <Link to="/login">Login</Link>}
+        <Link to="/contact">Contact </Link>
       </nav>
 
       {showPopup && (
@@ -95,6 +97,7 @@ const App = () => {
         <Route path="/chat" element={firebaseUser ? <Chat /> : <Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
+        <Route path="/contact" element={<ContactForm />} />
       </Routes>
     </Router>
   );

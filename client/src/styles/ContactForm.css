@@ -1,0 +1,49 @@
+/* WHH Color Variables */
+:root {
+    --WHH-Blue: #003049;
+    --WHH-Red: #c1121F;
+    --WHH-Light-Blue: #669BBC;
+    --WHH-Gray: #EBEDF0;
+}
+
+/* Contact Page Layout */
+.contact-form-page {
+  padding: 2rem;
+  background-color: var(--WHH-Gray);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Page Title */
+.contact-title {
+  font-size: 2rem;
+  color: var(--WHH-Blue);
+  margin-bottom: 1rem;
+}
+
+/* Form Container */
+.contact-form-container {
+  background-color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 700px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  color: #333;
+  border: 2px solid var(--WHH-Blue);
+}
+
+/* Box for Embed */
+.contact-form-placeholder {
+  border: 2px dashed var(--WHH-Light-Blue);
+  background-color: #f9f9f9;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #555;
+  font-style: italic;
+}
