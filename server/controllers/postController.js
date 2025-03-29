@@ -11,7 +11,26 @@ exports.getAllPosts = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+exports.getPostsById = async (req, res) => {
+    try {
+        //Extract category from req parameters
+        const { postId } = req.params;
 
+        //Query the db
+        const post = await Post.find({ postId: postId });
+
+        //No posts found handling
+        if (!post.length) {
+            return res.status(404).json({ message: "No post found with this ID." });
+        }
+
+        //Send the posts as a response
+        res.json(post);
+    } catch (err) {
+        //Handle any potential errors
+        res.status(500).json({ message: err.message });
+    }
+};
 //GET /api/post/category/:category
 exports.getPostsByCategory = async (req, res) => {
     try {
@@ -80,3 +99,49 @@ exports.createForumPost = [
     }
   }
 ];
+
+//Reply CRUD
+//POST /api/post/:postId/reply
+exports.createReply = [
+    //Validation for the reply content
+    body('contents').isString().notEmpty().withMessage('Reply cannot be empty'),
+  
+    async (req, res) => {
+      //Check validation
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+  
+      try {
+        const { userName, contents, isEdited} = req.body; //Extract body
+        const { postId } = req.params; //Extract postId from the request parameters
+
+        //Find the post by string id
+        const post = await Post.findOne({ id: postId });
+  
+        if (!post) {
+          return res.status(404).json({ message: "Post not found" });
+        }
+  
+        //Create the reply object
+        const newReply = {
+          userName,
+          contents,
+          isEdited: false,//dEfault false
+        };
+  
+        //Add new reply to replies array
+        post.replies.push(newReply);
+  
+        //Save post with new reply
+        const updatedPost = await post.save();
+  
+        //Respond with the updated post
+        res.status(201).json(updatedPost);
+      } catch (error) {
+        console.error("Error creating reply:", error);
+        res.status(500).json({ error: "Failed to create reply" });
+      }
+    },
+  ];
