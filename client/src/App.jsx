@@ -7,6 +7,9 @@ import Chat from "./Pages/Chat.jsx";
 import Login from "./Pages/Login.jsx";
 import Logout from "./Pages/Logout.jsx";
 import ContactForm from "./Pages/ContactForm";
+import ForumLanding from "./Pages/ForumLanding";
+import ForumCategory from "./Pages/ForumCategory";
+import ForumThread from "./Pages/ForumThread";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "/src/firebase-config";
 
@@ -69,9 +72,10 @@ const App = () => {
             <Link to="/post-event">Post Event </Link>
             <Link to="/chat">Chat </Link>
             <Link to="/logout">Logout </Link>
+            <Link to="/forum">Forum </Link>
           </>
         )}
-        {!firebaseUser && <Link to="/login">Login</Link>}
+        {!firebaseUser && <Link to="/login">Login </Link>}
         <Link to="/contact">Contact </Link>
       </nav>
 
@@ -98,7 +102,22 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/contact" element={<ContactForm />} />
+
+        {/* Forum routes - protected */}
+        <Route
+          path="/forum"
+          element={firebaseUser ? <ForumLanding /> : <Login />}
+        />
+        <Route
+          path="/forum/category/:category"
+          element={firebaseUser ? <ForumCategory /> : <Login />}
+        />
+        <Route
+          path="/forum/thread/:postId"
+          element={firebaseUser ? <ForumThread /> : <Login />}
+        />
       </Routes>
+
     </Router>
   );
 };

@@ -17,11 +17,11 @@ exports.getPostsById = async (req, res) => {
         const { postId } = req.params;
 
         //Query the db
-        const post = await Post.find({ postId: postId });
+        const post = await Post.findOne({ id: postId });
 
         //No posts found handling
-        if (!post.length) {
-            return res.status(404).json({ message: "No post found with this ID." });
+        if (!post) {
+          return res.status(404).json({ message: "No post found with this ID." });
         }
 
         //Send the posts as a response
@@ -145,3 +145,29 @@ exports.createReply = [
       }
     },
   ];
+
+  // DELETE /api/forum/id/:id
+exports.deletePostById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedPost = await Post.findOneAndDelete({ id });
+
+    if (!deletedPost) {
+      return res.status(404).json({ message: "Post not found." });
+    }
+
+    res.status(200).json({ message: "Post deleted successfully." });
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting post.", error: err.message });
+  }
+};
+
+// DELETE ALL /api/forum
+exports.deleteAllPosts = async (req, res) => {
+  try {
+    const result = await Post.deleteMany({});
+    res.status(200).json({ message: `Deleted ${result.deletedCount} post(s).` });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete posts.", error: err.message });
+  }
+};
