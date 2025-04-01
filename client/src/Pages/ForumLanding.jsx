@@ -1,16 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "/src/styles/news.css";
 import Logo from "/src/assets/Hockey.png";
+import axios from "axios";
 
 const ForumLanding = () => {
-  const testCategories = [
-    "Test Category 1",
-    "Test Category 2",
-    "Test Category 3",
-    "Test Category 4",
-    "Test Category 5",
-  ];
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/forum/categories");
+        setCategories(res.data);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   return (
     <div className="news-page">
@@ -22,7 +30,7 @@ const ForumLanding = () => {
 
       <div className="news-card-wrapper">
         <div className="news-cards-container">
-          {testCategories.map((category, index) => (
+          {categories.map((category, index) => (
             <Link
               to={`/forum/category/${encodeURIComponent(category)}`}
               key={index}

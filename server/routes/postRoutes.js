@@ -7,7 +7,8 @@ const {
   getPostsById,
   createReply,
   deletePostById,
-  deleteAllPosts
+  deleteAllPosts,
+  getAllCategories
 } = require("../controllers/postController");
 
 router.get('/', getAllPosts);
@@ -17,5 +18,6 @@ router.post('/', createForumPost);
 router.post('/:postId/reply', createReply);
 router.delete('/id/:id', deletePostById);
 router.delete('/', deleteAllPosts);
+router.get('/categories', getAllCategories);
 
 module.exports = router;

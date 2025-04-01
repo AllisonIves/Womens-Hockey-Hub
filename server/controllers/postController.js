@@ -171,3 +171,14 @@ exports.deleteAllPosts = async (req, res) => {
     res.status(500).json({ message: "Failed to delete posts.", error: err.message });
   }
 };
+
+// GET /api/forum/categories
+exports.getAllCategories = async (req, res) => {
+  try {
+    const posts = await Post.find().select("Category -_id");
+    const categories = [...new Set(posts.map(post => post.Category))];
+    res.json(categories);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

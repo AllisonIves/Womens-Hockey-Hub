@@ -205,3 +205,11 @@
   height: auto;
   border-radius: 12px;
 }
+
+/* Main post height consistent with replies */
+.original-post-wrapper {
+  min-height: auto;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
