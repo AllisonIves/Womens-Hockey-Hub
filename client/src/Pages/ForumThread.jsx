@@ -30,13 +30,13 @@ const ForumThread = () => {
   }, [postId]);
 
   const handleSubmitReply = async () => {
-    setErrorMessage(""); // Clear previous errors
+    setErrorMessage("");
 
     const minResult = replyCharacterMin(replyText);
     if (!minResult.isValid) {
       setErrorMessage(minResult.message);
       return;
-}
+    }
 
     const result = replyCharacterLimit(replyText);
     if (!result.isValid) {
@@ -50,9 +50,9 @@ const ForumThread = () => {
         contents: replyText,
       });
 
-      setPost(res.data); // Update post with new reply
-      setReplyText("");  // Clear textarea
-      setErrorMessage(""); // Clear error message
+      setPost(res.data);
+      setReplyText("");
+      setErrorMessage("");
     } catch (error) {
       console.error("Failed to submit reply:", error);
       setErrorMessage("Failed to submit reply. Please try again.");
@@ -77,6 +77,7 @@ const ForumThread = () => {
       <div className="news-card-wrapper original-post-wrapper">
         <div className="news-cards-container">
           <div className="news-card">
+            <div className="meta-container"></div>
             <div className="news-card-content">
               <p>{post.contents}</p>
             </div>
@@ -92,6 +93,7 @@ const ForumThread = () => {
             <div className="news-cards-container">
               {currentReplies.map((reply, index) => (
                 <div key={index} className="news-card">
+                  <div className="meta-container"></div>
                   <div className="news-card-content">
                     <p>{reply.contents}</p>
                   </div>

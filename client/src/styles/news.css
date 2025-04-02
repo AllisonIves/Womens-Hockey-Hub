@@ -266,3 +266,25 @@
   scrollbar-color: var(--WHH-Light-Blue) transparent;
   max-height: 500px;
 }
+
+/* Left-side metadata section in reply card */
+.reply-meta {
+  width: 150px;
+  background-color: var(--WHH-Blue);
+  color: white;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 2px solid white;
+}
+
+/* Stylings for meta data container */
+.meta-container {
+  width: 150px;
+  min-height: 100%;
+  background-color: var(--WHH-Blue);
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}

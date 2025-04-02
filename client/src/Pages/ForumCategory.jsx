@@ -48,7 +48,9 @@ const ForumCategory = () => {
                   to={`/forum/thread/${post.id}`}
                   key={post.id}
                   className="news-card"
+                  style={{ textDecoration: "none", color: "inherit" }}
                 >
+                  <div className="meta-container" />
                   <div className="news-card-content">
                     <p>{post.contents.slice(0, 300)}...</p>
                   </div>
@@ -58,33 +60,33 @@ const ForumCategory = () => {
           </div>
 
           <div className="pagination">
-              {currentPage > 1 && (
-                <button className="page-button" onClick={() => handlePageChange(currentPage - 1)}>
-                  Prev
+            {currentPage > 1 && (
+              <button className="page-button" onClick={() => handlePageChange(currentPage - 1)}>
+                Prev
+              </button>
+            )}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(pageNum =>
+                pageNum === 1 ||
+                pageNum === totalPages ||
+                (pageNum >= currentPage - 1 && pageNum <= currentPage + 2)
+              )
+              .map((pageNum) => (
+                <button
+                  key={pageNum}
+                  className="page-button"
+                  onClick={() => handlePageChange(pageNum)}
+                  disabled={pageNum === currentPage}
+                >
+                  {pageNum}
                 </button>
-              )}
-              {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter(pageNum =>
-                  pageNum === 1 ||
-                  pageNum === totalPages ||
-                  (pageNum >= currentPage - 1 && pageNum <= currentPage + 2)
-                )
-                .map((pageNum) => (
-                  <button
-                    key={pageNum}
-                    className="page-button"
-                    onClick={() => handlePageChange(pageNum)}
-                    disabled={pageNum === currentPage}
-                  >
-                    {pageNum}
-                  </button>
-                ))}
-              {currentPage < totalPages && (
-                <button className="page-button" onClick={() => handlePageChange(currentPage + 1)}>
-                  Next
-                </button>
-              )}
-            </div>
+              ))}
+            {currentPage < totalPages && (
+              <button className="page-button" onClick={() => handlePageChange(currentPage + 1)}>
+                Next
+              </button>
+            )}
+          </div>
         </>
       )}
     </div>
