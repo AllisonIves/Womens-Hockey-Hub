@@ -2,8 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import "/src/styles/news.css";
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en';
+import ReactTimeAgo from 'react-time-ago';
 
 
+// Register the locale data
+TimeAgo.addDefaultLocale(en);
 
 const ForumCategory = () => {
   const { category } = useParams();
@@ -115,10 +120,10 @@ const ForumCategory = () => {
                   <p>
                   {`Original poster: ${post.userName}`}
                   </p>
-                  {/* Display the timestamp of the most recent reply */}
+                  {/* Display how long ago last reply was using React Time Ago */}
                   {post.replies.length > 0 && (
                     <p>
-                      Most recent reply: {formatTimestamp(post.replies.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0].createdAt)}
+                      <ReactTimeAgo date={new Date(post.replies.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0].createdAt)} locale="en-CA" />
                     </p>
                   )}
                     <p>{post.contents.slice(0, 300)}...</p>
