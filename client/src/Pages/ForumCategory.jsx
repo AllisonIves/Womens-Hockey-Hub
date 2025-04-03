@@ -3,11 +3,16 @@ import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import "/src/styles/news.css";
 
+
 const ForumCategory = () => {
   const { category } = useParams();
   const [posts, setPosts] = useState([]);
+  const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showPostForm, setShowPostForm] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [postText, setPostText] = useState("");
   const itemsPerPage = 25;
 
   useEffect(() => {
@@ -24,6 +29,30 @@ const ForumCategory = () => {
 
     fetchPosts();
   }, [category]);
+
+  
+  const handleSubmitPost = async () => {
+    setErrorMessage("");
+
+    try {
+      const res = await axios.post('http://localhost:5000/api/forum/', {
+        userName: "Anonymous", //Set to Google user's name in next update
+        contents: postText,
+        Category: category
+      });
+
+      setPost(res.data);
+      setPostText("");
+      setErrorMessage("");
+    } catch (error) {
+      console.error("Failed to submit post:", error);
+      setErrorMessage("Failed to submit post. Please try again.");
+    }
+  };
+
+  const handleStartThreadClick = () => {
+    setShowPostForm(true); //Show the post form when the buttn is clicked
+  };
 
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -88,6 +117,29 @@ const ForumCategory = () => {
             )}
           </div>
         </>
+      )
+      }
+
+      {/*Start thread button*/}
+      {!showPostForm && (
+        <button className="start-thread-btn" onClick={handleStartThreadClick}>
+          Start a Thread
+        </button>
+      )}
+      {showPostForm && (
+        <div className="news-card-content reply-form-content">
+          <h3 className="reply-form-title">Start a thread</h3>
+          <textarea
+            className="reply-textarea"
+            placeholder="Write your post here..."
+            value={postText}
+            onChange={(e) => setPostText(e.target.value)}
+          />
+          {errorMessage && <p style={{ color: "red", marginBottom: "1rem" }}>{errorMessage}</p>}
+          <button className="page-button reply-submit-button" onClick={handleSubmitPost}>
+            Submit Post
+          </button>
+        </div>
       )}
     </div>
   );
