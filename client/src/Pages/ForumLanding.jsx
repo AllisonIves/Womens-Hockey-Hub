@@ -26,6 +26,15 @@ const ForumLanding = () => {
         <img src={Logo} alt="Women's Hockey Hub Logo" className="news-logo" />
       </div>
 
+      <div className="rules">
+        <div className="rules-container">
+          <p> Rules:</p>
+          <p> Don't be rude and/or racist </p>
+          <p> Do not start talking about divisive topics e.g politics </p>
+          <p> Do not spam and also self promotion is banned </p>
+          </div>
+      </div>
+
       <h1 className="news-title">Forum Categories</h1>
 
       <div className="news-card-wrapper">
