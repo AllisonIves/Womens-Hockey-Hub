@@ -1,22 +1,27 @@
 import React from "react";
-import { getAuth, signInWithPopup } from "firebase/auth";
+import {
+  signInWithPopup,
+  setPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
 import { auth, googleProvider } from "/src/firebase-config";
 import "/src/styles/Login.css";
 
 const Login = () => {
   const signInWithGoogle = async () => {
     try {
+      // Ensure session-based login
+      await setPersistence(auth, browserSessionPersistence);
+
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      console.log("Signed in user:", user);
-
-      // Store emailVerified status as a string in sessionStorage
+      // Set sessionStorage flags
       sessionStorage.setItem("emailVerified", user.emailVerified ? "true" : "false");
       sessionStorage.setItem("displayName", user.displayName);
 
-      // Send user info to backend
-      const response = await fetch("http://localhost:5000/api/users", {
+      // Send user to backend
+      await fetch("http://localhost:5000/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -29,10 +34,7 @@ const Login = () => {
         }),
       });
 
-      const data = await response.json();
-      console.log("Backend response:", data);
-
-      // Redirect to homepage
+      // Redirect
       window.location.href = "/";
     } catch (error) {
       console.error("Error signing in with Google:", error);

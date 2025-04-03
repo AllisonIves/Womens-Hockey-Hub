@@ -17,43 +17,44 @@ const App = () => {
   const [firebaseUser, setFirebaseUser] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
 
-  // Track Firebase login state
+  // Listen for Firebase Auth
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && user.emailVerified) {
-        sessionStorage.setItem("emailVerified", "true");
         setFirebaseUser(user);
+        sessionStorage.setItem("emailVerified", "true");
+        sessionStorage.setItem("displayName", user.displayName || "Anonymous");
       } else {
-        sessionStorage.setItem("emailVerified", "false");
         setFirebaseUser(null);
+        sessionStorage.setItem("emailVerified", "false");
+        sessionStorage.removeItem("displayName");
       }
     });
 
     return () => unsubscribe();
   }, []);
 
-  // Inactivity Timer
+  // Inactivity logout (clicks & navigation)
   useEffect(() => {
     let timeout;
 
     const logoutForInactivity = async () => {
-      console.log("Inactivity detected. Logging out...");
+      console.log("🔒 Logging out due to inactivity");
+      await signOut(auth);
       sessionStorage.setItem("emailVerified", "false");
+      sessionStorage.removeItem("displayName");
       setFirebaseUser(null);
       setShowPopup(true);
-      await signOut(auth);
     };
 
     const resetTimer = () => {
       clearTimeout(timeout);
-      timeout = setTimeout(logoutForInactivity, 30 * 60 * 1000); // 30 minute timer
+      timeout = setTimeout(logoutForInactivity, 30 * 60 * 1000); // 30 mins
     };
 
-    // Listen for navigation or clicks
     window.addEventListener("click", resetTimer);
     window.addEventListener("popstate", resetTimer);
-
-    resetTimer(); // Start timer on mount
+    resetTimer();
 
     return () => {
       clearTimeout(timeout);
@@ -67,15 +68,16 @@ const App = () => {
       <nav>
         <Link to="/">News </Link>
         <Link to="/events">Community Events </Link>
-        {firebaseUser && (
+        {firebaseUser ? (
           <>
             <Link to="/post-event">Post Event </Link>
             <Link to="/chat">Chat </Link>
             <Link to="/logout">Logout </Link>
             <Link to="/forum">Forum </Link>
           </>
+        ) : (
+          <Link to="/login">Login </Link>
         )}
-        {!firebaseUser && <Link to="/login">Login </Link>}
         <Link to="/contact">Contact </Link>
       </nav>
 
@@ -88,36 +90,15 @@ const App = () => {
       <Routes>
         <Route path="/" element={<News />} />
         <Route path="/events" element={<CommunityEventPage />} />
-        <Route
-          path="/post-event"
-          element={
-            firebaseUser ? (
-              <CommunityEventForm onEventSubmit={() => {}} />
-            ) : (
-              <Login />
-            )
-          }
-        />
+        <Route path="/post-event" element={firebaseUser ? <CommunityEventForm /> : <Login />} />
         <Route path="/chat" element={firebaseUser ? <Chat /> : <Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/contact" element={<ContactForm />} />
-
-        {/* Forum routes - protected */}
-        <Route
-          path="/forum"
-          element={firebaseUser ? <ForumLanding /> : <Login />}
-        />
-        <Route
-          path="/forum/category/:category"
-          element={firebaseUser ? <ForumCategory /> : <Login />}
-        />
-        <Route
-          path="/forum/thread/:postId"
-          element={firebaseUser ? <ForumThread /> : <Login />}
-        />
+        <Route path="/forum" element={firebaseUser ? <ForumLanding /> : <Login />} />
+        <Route path="/forum/category/:category" element={firebaseUser ? <ForumCategory /> : <Login />} />
+        <Route path="/forum/thread/:postId" element={firebaseUser ? <ForumThread /> : <Login />} />
       </Routes>
-
     </Router>
   );
 };
