@@ -93,6 +93,12 @@ const ForumCategory = () => {
                   <div className="meta-container" />
                   <div className="news-card-content">
                   {post.isPinned && (<div className="pin-icon">📌</div>)}
+                  <p>
+                    {/* Show number replies with grammatical handling for single reply threads*/}
+                    {post.replies.length === 1
+                    ? `${post.replies.length} reply`
+                    : `${post.replies.length} replies`}
+                  </p>
                     <p>{post.contents.slice(0, 300)}...</p>
                   </div>
                 </Link>
