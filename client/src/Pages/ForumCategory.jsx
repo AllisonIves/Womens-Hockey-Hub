@@ -99,6 +99,9 @@ const ForumCategory = () => {
                     ? `${post.replies.length} reply`
                     : `${post.replies.length} replies`}
                   </p>
+                  <p>
+                  {`Original poster: ${post.userName}`}
+                  </p>
                     <p>{post.contents.slice(0, 300)}...</p>
                   </div>
                 </Link>
