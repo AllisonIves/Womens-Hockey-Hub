@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "/src/styles/news.css";
 import replyCharacterLimit from "/src/utilities/replyCharacterLimit";
@@ -7,6 +7,7 @@ import replyCharacterMin from "/src/utilities/replyCharacterMin";
 
 const ForumThread = () => {
   const { postId } = useParams();
+  const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [users, setUsers] = useState({});
   const [loading, setLoading] = useState(true);
@@ -47,7 +48,6 @@ const ForumThread = () => {
       return;
     }
 
-    
     try {
       const res = await axios.post(`http://localhost:5000/api/forum/${postId}/reply`, {
         userName: displayName,
@@ -64,104 +64,87 @@ const ForumThread = () => {
   };
 
   const handleEditReply = async (replyId, isDelete) => {
-    setErrorMessage(""); // Clear any existing error message
-    if(!isDelete){
-    // Ensure the reply text is valid (min length check)
-    const minResult = replyCharacterMin(replyText);
-    if (!minResult.isValid) {
-      setErrorMessage(minResult.message);
-      return;
+    setErrorMessage("");
+
+    if (!isDelete) {
+      const minResult = replyCharacterMin(replyText);
+      if (!minResult.isValid) {
+        setErrorMessage(minResult.message);
+        return;
+      }
+
+      const result = replyCharacterLimit(replyText);
+      if (!result.isValid) {
+        setErrorMessage(result.message);
+        return;
+      }
+
+      try {
+        const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}/${replyId}`, {
+          userName: displayName,
+          contents: replyText,
+        });
+
+        setPost(res.data);
+        setReplyText("");
+        setErrorMessage("");
+      } catch (error) {
+        console.error("Failed to edit reply:", error);
+        setErrorMessage("Failed to edit reply. Please try again.");
+      }
+    } else {
+      try {
+        const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}/${replyId}`, {
+          contents: "This message has been deleted",
+        });
+
+        setPost(res.data);
+        setReplyText("");
+        setErrorMessage("");
+      } catch (error) {
+        console.error("Failed to delete reply:", error);
+        setErrorMessage("Failed to delete reply. Please try again.");
+      }
     }
-  
-    // Ensure the reply text doesn't exceed the character limit
-    const result = replyCharacterLimit(replyText);
-    if (!result.isValid) {
-      setErrorMessage(result.message);
-      return;
-    }
-  
-    try {
-      // Send a PUT request to the API to update the reply
-      const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}/${replyId}`, {
-        userName: displayName,
-        contents: replyText,
-      });
-  
-      // Update the state with the updated reply data
-      setPost(res.data);
-      setReplyText(""); // Clear the reply text
-      setErrorMessage(""); // Clear any error message
-    } catch (error) {
-      console.error("Failed to edit reply:", error);
-      setErrorMessage("Failed to edit reply. Please try again.");
-    }
-  }
-  else{
-    try {
-      // Send a PUT request to the API to update the reply
-      const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}/${replyId}`, {
-        contents: "This message has been deleted",
-      });
-  
-      // Update the state with the updated reply data
-      setPost(res.data);
-      setReplyText(""); // Clear the reply text
-      setErrorMessage(""); // Clear any error message
-    } catch (error) {
-      console.error("Failed to delete reply:", error);
-      setErrorMessage("Failed to delete reply. Please try again.");
-    }
-  }
   };
 
   useEffect(() => {
     if (post) {
-      // Function to fetch the user for a given username
       const fetchUser = async (userName) => {
         try {
-          // If user data is already in state, do not fetch again
           if (users[userName]) return;
 
           const encodedUserName = encodeURIComponent(userName);
           const res = await axios.get(`http://localhost:5000/api/users/${encodedUserName}`);
-          setUsers((prevUsers) => ({ ...prevUsers, [userName]: res.data }));
+          setUsers((prev) => ({ ...prev, [userName]: res.data }));
         } catch (err) {
           console.error("Failed to fetch user:", err);
         }
       };
 
-      // Fetch the user for the original post
       fetchUser(post.userName);
 
-      //Fetch user for each reply
       post.replies.forEach((reply) => {
-        if (!users[reply.userName]) { //Avoid re-fetching the same user
+        if (!users[reply.userName]) {
           fetchUser(reply.userName);
         }
       });
     }
-  }, [post, users]); //Run when post or users change
+  }, [post, users]);
 
-  //Function to format date for readability
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    
-    //Format date
-    const formattedDate = date.toLocaleDateString("en-US", {
+    return `${date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    });
-  
-    const formattedTime = date.toLocaleTimeString("en-US", {
+    })} at ${date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: true, //12-hour clock
-    });
-  
-    //Combine date and time
-    return `${formattedDate} at ${formattedTime}`;
+      hour12: true,
+    })}`;
   };
+
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   if (loading) return <div className="news-page"><p>Loading thread...</p></div>;
@@ -181,19 +164,16 @@ const ForumThread = () => {
         <div className="news-cards-container">
           <div className="news-card">
             <div className="meta-container">
-            <p>{post.userName}</p>
-              {/* Check if user exists before rendering image */}
-              {users[post.userName] && users[post.userName].photoURL && (
+              <p>{post.userName}</p>
+              {users[post.userName]?.photoURL && (
                 <img src={users[post.userName].photoURL} alt={`${post.userName}'s profile`} width={100} height={100} />
               )}
-              <hr/>
+              <hr />
               <p>{formatDate(post.createdAt)}</p>
             </div>
             <div className="news-card-content">
               <p>{post.contents}</p>
-              <div className="edit-delete-container">
-              {post.isEdited && (<div className="edited-icon">✎</div>)}
-              </div>
+              {post.isEdited && <div className="edited-icon">✎</div>}
             </div>
           </div>
         </div>
@@ -201,16 +181,15 @@ const ForumThread = () => {
 
       {/* Replies */}
       <h2 className="news-title">Replies</h2>
-      {post.replies && post.replies.length > 0 ? (
+      {post.replies?.length > 0 ? (
         <>
           <div className="replies-wrapper">
             <div className="news-cards-container">
               {currentReplies.map((reply, index) => (
                 <div key={index} className="news-card">
                   <div className="meta-container">
-                  <p>{reply.userName}</p>
-                    {/* Check if user exists before rendering image */}
-                    {users[reply.userName] && users[reply.userName].photoURL && (
+                    <p>{reply.userName}</p>
+                    {users[reply.userName]?.photoURL && (
                       <img src={users[reply.userName].photoURL} alt={`${reply.userName}'s profile`} width={100} height={100} />
                     )}
                     <p>{formatDate(reply.createdAt)}</p>
@@ -218,26 +197,32 @@ const ForumThread = () => {
                   <div className="news-card-content">
                     <p>{reply.contents}</p>
                     <div className="edit-delete-container">
-              {post.isEdited && (<div className="edited-icon">✎</div>)}
-                <button className="edit-button" onClick={() => handleEditReply(reply._id, false)}>Edit</button>
-                <button className="delete-button" onClick={() => handleEditReply(reply._id, true)}>Delete</button>
-              </div>
+                      {reply.isEdited && <div className="edited-icon">✎</div>}
+                      <button className="edit-button" onClick={() => handleEditReply(reply._id, false)}>Edit</button>
+                      <button className="delete-button" onClick={() => handleEditReply(reply._id, true)}>Delete</button>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Pagination */}
+          {/* Back and Pagination */}
+          <button
+            className="page-button"
+            onClick={() => navigate(-1)}
+            style={{ marginBottom: "1rem" }}
+          >
+            ← Back to Category
+          </button>
+
           <div className="pagination">
             {currentPage > 1 && (
               <button className="page-button" onClick={() => handlePageChange(currentPage - 1)}>Prev</button>
             )}
             {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter(pageNum =>
-                pageNum === 1 ||
-                pageNum === totalPages ||
-                (pageNum >= currentPage - 1 && pageNum <= currentPage + 2)
+              .filter((pageNum) =>
+                pageNum === 1 || pageNum === totalPages || (pageNum >= currentPage - 1 && pageNum <= currentPage + 2)
               )
               .map((pageNum) => (
                 <button

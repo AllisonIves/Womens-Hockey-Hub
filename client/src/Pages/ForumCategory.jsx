@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "/src/styles/news.css";
 import TimeAgo from 'javascript-time-ago';
@@ -12,6 +12,7 @@ TimeAgo.addDefaultLocale(en);
 
 const ForumCategory = () => {
   const { category } = useParams();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -49,22 +50,33 @@ const ForumCategory = () => {
   
   const handleSubmitPost = async () => {
     setErrorMessage("");
-
+  
     try {
-      const res = await axios.post('http://localhost:5000/api/forum/', {
+      const res = await axios.post("http://localhost:5000/api/forum/", {
         userName: displayName,
         contents: postText,
-        Category: category
+        Category: category,
       });
-
-      setPost(res.data);
-      setPostText("");
-      setErrorMessage("");
+  
+      // Add the new post to the top of the list
+      const updatedPosts = [res.data, ...posts];
+  
+      // Re-sort the posts with pinned posts first
+      const sortedPosts = updatedPosts.sort((a, b) => {
+        if (a.isPinned === b.isPinned) return 0;
+        return a.isPinned ? -1 : 1;
+      });
+  
+      setPosts(sortedPosts); // Update posts list
+      setPostText(""); // Clear textarea
+      setShowPostForm(false); // Hide the form
+      setErrorMessage(""); // Clear error
     } catch (error) {
       console.error("Failed to submit post:", error);
       setErrorMessage("Failed to submit post. Please try again.");
     }
   };
+  ;
 
   const handleStartThreadClick = () => {
     setShowPostForm(true); //Show the post form when the buttn is clicked
@@ -133,6 +145,14 @@ const ForumCategory = () => {
             </div>
           </div>
 
+          <button
+            className="page-button"
+            onClick={() => navigate("/forum")}
+            style={{ marginBottom: "1rem" }}
+          >
+            ← Back to Landing Page
+          </button>
+
           <div className="pagination">
             {currentPage > 1 && (
               <button className="page-button" onClick={() => handlePageChange(currentPage - 1)}>
@@ -165,27 +185,35 @@ const ForumCategory = () => {
       )
       }
 
-      {/*Start thread button*/}
-      {!showPostForm && (
-        <button className="start-thread-btn" onClick={handleStartThreadClick}>
-          Start a Thread
-        </button>
-      )}
-      {showPostForm && (
-        <div className="news-card-content reply-form-content">
-          <h3 className="reply-form-title">Start a thread</h3>
-          <textarea
-            className="reply-textarea"
-            placeholder="Write your post here..."
-            value={postText}
-            onChange={(e) => setPostText(e.target.value)}
-          />
-          {errorMessage && <p style={{ color: "red", marginBottom: "1rem" }}>{errorMessage}</p>}
-          <button className="page-button reply-submit-button" onClick={handleSubmitPost}>
-            Submit Post
+      {/* Show the Start Thread button when form is hidden */}
+        {!showPostForm && (
+          <button className="page-button start-thread-btn" onClick={handleStartThreadClick}>
+            Start a Thread
           </button>
-        </div>
-      )}
+        )}
+
+        {/* Show the thread form when button is clicked */}
+        {showPostForm && (
+          <div className="news-card-wrapper">
+            <div className="news-cards-container">
+              <div className="news-card">
+                <div className="news-card-content reply-form-content">
+                  <h3 className="reply-form-title">Start a Thread</h3>
+                  <textarea
+                    className="reply-textarea"
+                    placeholder="Write your post here..."
+                    value={postText}
+                    onChange={(e) => setPostText(e.target.value)}
+                  />
+                  {errorMessage && <p style={{ color: "red", marginBottom: "1rem" }}>{errorMessage}</p>}
+                  <button className="page-button reply-submit-button" onClick={handleSubmitPost}>
+                    Submit Post
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
     </div>
   );
 };
