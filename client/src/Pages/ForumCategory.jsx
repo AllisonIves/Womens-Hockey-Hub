@@ -123,7 +123,7 @@ const ForumCategory = () => {
                   {/* Display how long ago last reply was using React Time Ago */}
                   {post.replies.length > 0 && (
                     <p>
-                      <ReactTimeAgo date={new Date(post.replies.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0].createdAt)} locale="en-CA" />
+                      Most recent reply: <ReactTimeAgo date={new Date(post.replies.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0].createdAt)} locale="en-CA" />
                     </p>
                   )}
                     <p>{post.contents.slice(0, 300)}...</p>
