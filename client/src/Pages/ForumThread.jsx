@@ -62,6 +62,58 @@ const ForumThread = () => {
       setErrorMessage("Failed to submit reply. Please try again.");
     }
   };
+
+  const handleEditReply = async (replyId, isDelete) => {
+    setErrorMessage(""); // Clear any existing error message
+    if(!isDelete){
+    // Ensure the reply text is valid (min length check)
+    const minResult = replyCharacterMin(replyText);
+    if (!minResult.isValid) {
+      setErrorMessage(minResult.message);
+      return;
+    }
+  
+    // Ensure the reply text doesn't exceed the character limit
+    const result = replyCharacterLimit(replyText);
+    if (!result.isValid) {
+      setErrorMessage(result.message);
+      return;
+    }
+  
+    try {
+      // Send a PUT request to the API to update the reply
+      const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}/${replyId}`, {
+        userName: displayName,
+        contents: replyText,
+      });
+  
+      // Update the state with the updated reply data
+      setPost(res.data);
+      setReplyText(""); // Clear the reply text
+      setErrorMessage(""); // Clear any error message
+    } catch (error) {
+      console.error("Failed to edit reply:", error);
+      setErrorMessage("Failed to edit reply. Please try again.");
+    }
+  }
+  else{
+    try {
+      // Send a PUT request to the API to update the reply
+      const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}/${replyId}`, {
+        contents: "This message has been deleted",
+      });
+  
+      // Update the state with the updated reply data
+      setPost(res.data);
+      setReplyText(""); // Clear the reply text
+      setErrorMessage(""); // Clear any error message
+    } catch (error) {
+      console.error("Failed to delete reply:", error);
+      setErrorMessage("Failed to delete reply. Please try again.");
+    }
+  }
+  };
+
   useEffect(() => {
     if (post) {
       // Function to fetch the user for a given username
@@ -139,6 +191,9 @@ const ForumThread = () => {
             </div>
             <div className="news-card-content">
               <p>{post.contents}</p>
+              <div className="edit-delete-container">
+              {post.isEdited && (<div className="edited-icon">✎</div>)}
+              </div>
             </div>
           </div>
         </div>
@@ -162,6 +217,11 @@ const ForumThread = () => {
                   </div>
                   <div className="news-card-content">
                     <p>{reply.contents}</p>
+                    <div className="edit-delete-container">
+              {post.isEdited && (<div className="edited-icon">✎</div>)}
+                <button className="edit-button" onClick={() => handleEditReply(reply._id, false)}>Edit</button>
+                <button className="delete-button" onClick={() => handleEditReply(reply._id, true)}>Delete</button>
+              </div>
                   </div>
                 </div>
               ))}

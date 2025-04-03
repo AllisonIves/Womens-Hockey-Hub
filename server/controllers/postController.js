@@ -76,8 +76,6 @@ exports.createForumPost = [
     try {
         //Generate id
         const id = uuidv4();
-        //get display name from session storage
-        //const userName = sessionStorage.getItem("displayName");
         //use req body to assign the other attributes
         const { userName, contents, Category, isEdited, isPinned, replies } = req.body;
       
@@ -120,7 +118,7 @@ exports.updateForumPost = [
         try {
             //Find the post by id
             const { postId } = req.params;
-            const post = await Post.findOne({ postId});
+            const post = await Post.findOne({ id: postId});
             if (!post) {
                 return res.status(404).json({ error: 'Post not found' }); //Not found handling
             }
@@ -191,6 +189,7 @@ exports.createReply = [
       }
     },
   ];
+
 exports.updateReply = [
     // Validation for the reply content
     body('contents').optional().isString().withMessage('Reply content must be a string'),
