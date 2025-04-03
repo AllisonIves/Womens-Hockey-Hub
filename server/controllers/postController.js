@@ -100,6 +100,52 @@ exports.createForumPost = [
   }
 ];
 
+//UPDATE forum post
+
+exports.updateForumPost = [
+  //Validation (just type for now)
+    body('contents').optional().isString().withMessage('Contents must be a string'),
+    body('isEdited').optional().isBoolean().withMessage('isEdited must be a boolean'),
+
+    async (req, res) => {
+        
+    //Check validation
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const { contents} = req.body;
+
+        try {
+            //Find the post by id
+            const { postId } = req.params;
+            const post = await Post.findOne({ postId});
+            if (!post) {
+                return res.status(404).json({ error: 'Post not found' }); //Not found handling
+            }
+
+
+            //Update fields (if provided)
+            if (contents !== undefined) {
+                post.contents = contents;
+                post.isEdited = true; //Set isEdited boolean to true if content is updated
+            }
+
+
+            //Save updated post
+            const updatedPost = await post.save();
+
+            res.status(200).json(updatedPost);
+
+        } catch (error) {
+            console.error("Error updating:", error);
+            res.status(500).json({ error: 'Failed to update' });
+    }
+  }
+];
+
+
 //Reply CRUD
 //POST /api/post/:postId/reply
 exports.createReply = [
@@ -144,6 +190,50 @@ exports.createReply = [
         res.status(500).json({ error: "Failed to create reply" });
       }
     },
+  ];
+exports.updateReply = [
+    // Validation for the reply content
+    body('contents').optional().isString().withMessage('Reply content must be a string'),
+  
+    async (req, res) => {
+        // Check validation
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+  
+        const { contents } = req.body; //Extract the contents from the request body
+        const { postId, replyId } = req.params; //Extract postId and replyId from the request params
+  
+        try {
+            //Find the post by postId
+            const post = await Post.findOne({ id: postId });
+            if (!post) {
+                return res.status(404).json({ message: "Post not found" });
+            }
+  
+            //Find the reply by replyId within the post's replies
+            const reply = post.replies.id(replyId); //Set reply as the reply with provided replyId from replies array
+            if (!reply) {
+            return res.status(404).json({ message: "Reply not found" });
+            }
+  
+            //Update the contents (if provided)
+            if (contents !== undefined) {
+            reply.contents = contents;
+            reply.isEdited = true; //Set isEdited to true when the reply is updated
+            }
+  
+            //Save updated post
+            const updatedPost = await post.save();
+  
+            //Respond with the updated post
+            res.status(200).json(updatedPost);
+        } catch (error) {
+            console.error("Error updating reply:", error);
+            res.status(500).json({ error: "Failed to update reply" });
+        }
+    }
   ];
 
   // DELETE /api/forum/id/:id

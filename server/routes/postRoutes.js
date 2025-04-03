@@ -8,7 +8,9 @@ const {
   createReply,
   deletePostById,
   deleteAllPosts,
-  getAllCategories
+  getAllCategories,
+  updateForumPost,
+  updateReply,
 } = require("../controllers/postController");
 
 router.get('/', getAllPosts);
@@ -19,5 +21,7 @@ router.post('/:postId/reply', createReply);
 router.delete('/id/:id', deletePostById);
 router.delete('/', deleteAllPosts);
 router.get('/categories', getAllCategories);
+router.put('/id/:postID', updateForumPost);
+router.put('/id/:postId/:replyId', updateReply);
 
 module.exports = router;
