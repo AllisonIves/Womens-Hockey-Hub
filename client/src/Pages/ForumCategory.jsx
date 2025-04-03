@@ -65,6 +65,19 @@ const ForumCategory = () => {
     setShowPostForm(true); //Show the post form when the buttn is clicked
   };
 
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    const options = {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      seconds: null,
+      hour12: true, //24 hour clocks are for the French and the military
+    };
+    return `${date.toLocaleDateString('en-US', options)}`; //Use US format to put year last
+  };
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -102,6 +115,12 @@ const ForumCategory = () => {
                   <p>
                   {`Original poster: ${post.userName}`}
                   </p>
+                  {/* Display the timestamp of the most recent reply */}
+                  {post.replies.length > 0 && (
+                    <p>
+                      Most recent reply: {formatTimestamp(post.replies.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0].createdAt)}
+                    </p>
+                  )}
                     <p>{post.contents.slice(0, 300)}...</p>
                   </div>
                 </Link>
