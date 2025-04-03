@@ -64,9 +64,12 @@ const ForumThread = () => {
   };
   useEffect(() => {
     if (post) {
-      //Fetch user for the original post
+      // Function to fetch the user for a given username
       const fetchUser = async (userName) => {
         try {
+          // If user data is already in state, do not fetch again
+          if (users[userName]) return;
+
           const encodedUserName = encodeURIComponent(userName);
           const res = await axios.get(`http://localhost:5000/api/users/${encodedUserName}`);
           setUsers((prevUsers) => ({ ...prevUsers, [userName]: res.data }));
@@ -75,7 +78,7 @@ const ForumThread = () => {
         }
       };
 
-      //Fetch user for the original post
+      // Fetch the user for the original post
       fetchUser(post.userName);
 
       //Fetch user for each reply
@@ -87,6 +90,26 @@ const ForumThread = () => {
     }
   }, [post, users]); //Run when post or users change
 
+  //Function to format date for readability
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    
+    //Format date
+    const formattedDate = date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  
+    const formattedTime = date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true, //12-hour clock
+    });
+  
+    //Combine date and time
+    return `${formattedDate} at ${formattedTime}`;
+  };
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   if (loading) return <div className="news-page"><p>Loading thread...</p></div>;
@@ -111,8 +134,9 @@ const ForumThread = () => {
               {users[post.userName] && users[post.userName].photoURL && (
                 <img src={users[post.userName].photoURL} alt={`${post.userName}'s profile`} width={100} height={100} />
               )}
+              <hr/>
+              <p>{formatDate(post.createdAt)}</p>
             </div>
-            
             <div className="news-card-content">
               <p>{post.contents}</p>
             </div>
@@ -134,6 +158,7 @@ const ForumThread = () => {
                     {users[reply.userName] && users[reply.userName].photoURL && (
                       <img src={users[reply.userName].photoURL} alt={`${reply.userName}'s profile`} width={100} height={100} />
                     )}
+                    <p>{formatDate(reply.createdAt)}</p>
                   </div>
                   <div className="news-card-content">
                     <p>{reply.contents}</p>
