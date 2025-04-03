@@ -35,16 +35,8 @@ module.exports = function (io) {
         // Send current room states
         socket.emit('roomList', usersByRoom);
 
-                // Handle new user joining
-            socket.on('setUsername', (username) => {
-                // Check if username is taken across all rooms
-                for (const room in usersByRoom) {
-                    if (usersByRoom[room].includes(username)) {
-                        socket.emit('userLimit', 'Username already taken. Please choose a different one.');
-                        socket.disconnect(); // Disconnect the user if username is taken
-                        return;
-                    }
-                }
+            //Handle new user joining
+            socket.on('userJoin', (username) => {
 
                 const room = assignRoom(); // Get a room with space
                 socket.room = room;

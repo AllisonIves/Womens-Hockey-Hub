@@ -9,51 +9,41 @@ function Chat() {
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const messageEndRef = useRef(null);
-    const [username, setUsername] = useState('');
-    const [isUsernameNull, setIsUsernameNull] = useState(true);
+
+    const [isInLobby, setIsInLobby] = useState(true);
     const [users, setUsers] = useState([]);
-    const [roomName, setRoomName] = useState('');
+    const [username, setDisplayName] = useState("");
 
     const inactivityTimeout = useRef(null);
     useEffect(() => {
         socket.current = io('http://localhost:5000');  //Initialize socket connection
-
+        setDisplayName(sessionStorage.getItem("displayName"));
         //Receive message event
         socket.current.on('receiveMessage', (message) => {
             setMessages((prevMessages) => [...prevMessages, message]);
         });
-
         //Updating user list
         socket.current.on('userList', (userList) => {
             setUsers(userList);
         });
-
-        // Receive room name after joining
-        socket.current.on('roomJoined', (room) => {
-            console.log('Joined room:', room);
-            setRoomName(room);
-        });
-
         //Banned word handling
         socket.current.on('bannedWord', (message) => {
             console.log('Received banned word message:', message);
             alert(message);
         });
-
         //User limit handling (maximum users and repeat names)
         socket.current.on('userLimit', (message) => {
             console.log(message); //Debug log
             alert(message);  //Alert the user
-            setIsUsernameNull(true);  //Reset the state to show the username input again
+            setIsInLobby(true);  //Reset the state to show the username inpyut again
         });
 
         socket.current.on('disconnect', () => {
             console.log('Disconnected from server');
-            setIsUsernameNull(true);
-            setUsername('');
+            setIsInLobby(true);
             setMessages([]);
         });
-
+        
         const resetInactivityTimer = () => {
             if (inactivityTimeout.current) {
                 clearTimeout(inactivityTimeout.current);
@@ -61,15 +51,16 @@ function Chat() {
             inactivityTimeout.current = setTimeout(() => {
                 socket.current.emit('disconnectUser');
                 socket.current.disconnect();
-                setIsUsernameNull(true); //Reset the state to show the username input again
+                setIsInLobby(true); //Reset the state to show the username inpyut again
                 alert('You have been disconnected due to inactivity.');
-            }, 10 * 60 * 1000); //10 minutes timer
+            }, 10 * 60 * 1000);
         };
 
         const activityEvents = ['keydown', 'input'];
         activityEvents.forEach((event) => {
             window.addEventListener(event, resetInactivityTimer);
         });
+
 
         return () => {
             socket.current.disconnect(); //Cleanup socket
@@ -95,19 +86,16 @@ function Chat() {
         setInputMessage(e.target.value);
     };
 
-    const handleUsernameSubmit = (e) => {
-        e.preventDefault();
-        if (username.trim()) {
-            setIsUsernameNull(false);
-            socket.current.emit('setUsername', username);
-        }
+    const handleEnterChat = (e) => {
+        setIsInLobby(false);
+        socket.current.emit('userJoin', username);
     };
 
     //Handle disconnecting the current user
     const handleDisconnectUser = () => {
         socket.current.emit('disconnectUser');
         socket.current.disconnect();
-        setIsUsernameNull(true); //Reset the state to show the username input again
+        setIsInLobby(true); //Reset the state to show the username inpyut again
     };
 
     //Handle disconnecting all users (to be removed)
@@ -117,32 +105,19 @@ function Chat() {
 
     return (
         <div>
-            {isUsernameNull ? (
-                <div className="username-selection">
-                    <h2>Enter Your Username</h2>
-                    <form onSubmit={handleUsernameSubmit}>
-                        <input
-                            type="text"
-                            placeholder="Enter your username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                        />
-                        <button type="submit">Enter Chat</button>
-                    </form>
-                </div>
+            {isInLobby ? (
+                <button type="submit" onClick={handleEnterChat}>Enter Chat</button>
             ) : (
                 <>
                     {/* Wrapper for chat and users */}
                     <div className="chat-wrapper">
                         {/* Chat Box */}
                         <div className="chat-container">
-                            <div className="chat-header">
-                                <h2>Chat</h2>
-                            </div>
+                            <h2>Chat</h2>
                             <div className="messages">
                                 {messages.map((msg, index) => (
-                                    <div
-                                        key={index}
+                                    <div 
+                                        key={index} 
                                         className={`message ${msg.username === username ? "you" : "other"}`}
                                     >
                                         <strong>{msg.username}</strong>: {msg.message}
@@ -163,11 +138,6 @@ function Chat() {
                                 </ul>
                             </div>
                         </div>
-                    </div>
-
-                    {/* Room Info Below Chat */}
-                    <div className="room-info-visible">
-                        <p><strong>{roomName}</strong></p>
                     </div>
 
                     {/* Message Input Box */}
