@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { sortEventsAsc, sortEventsDesc } from "./utilities/sortEvents"; 
 import filterApprovedEvents from "./utilities/filterApprovedEvents";
+import shareToSocial from "./utilities/shareToSocial";
 import "/src/styles/CommunityEventPage.css";
 
 const CommunityEventPage = () => {
@@ -82,29 +83,10 @@ const CommunityEventPage = () => {
             {/* Dropdown menu */}
             {openDropdown === event._id && (
               <div className="dropdown-menu">
-                {/* X Share */}
-                <a
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                    event.name
-                  )}&url=${encodeURIComponent(window.location.href)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="dropdown-item x"
-                >
-                  Share on X
-                </a>
-
-                {/* Facebook Share */}
-                <a
-                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-                    window.location.href
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="dropdown-item facebook"
-                >
-                  Share on Facebook
-                </a>
+                {/* Social Share Buttons*/}
+                <button onClick={() => shareToSocial('x', event.name, window.location.href)}>Share on X</button>
+                <button onClick={() => shareToSocial('facebook', event.name, window.location.href)}>Share on Facebook</button>
+                <button onClick={() => shareToSocial('reddit', event.name, window.location.href)}>Share on Reddit</button>
               </div>
             )}
             </li>
