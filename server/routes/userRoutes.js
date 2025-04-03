@@ -93,12 +93,12 @@ router.post("/logout", async (req, res) => {
     const deletedUser = await User.findOneAndDelete({ displayName });
 
     if (!deletedUser) {
-      return res.status(404).json({ message: "Post not found." });
+      return res.status(404).json({ message: "User not found." });
     }
 
-    res.status(200).json({ message: "Post deleted successfully." });
+    res.status(200).json({ message: "User deleted successfully." });
   } catch (err) {
-    res.status(500).json({ message: "Error deleting post.", error: err.message });
+    res.status(500).json({ message: "Error deleting user.", error: err.message });
   }
 });
 
