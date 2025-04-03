@@ -65,4 +65,41 @@ router.post("/logout", async (req, res) => {
     }
   });
 
+  router.get("/:userName", async (req, res) => {
+    try {
+      const { userName } = req.params;
+      
+      //Query the db and find a user by displayName
+      const user = await User.findOne({ displayName: userName });
+  
+      //If no user is found, return a 404 error
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+  
+      //Return the user object
+      res.status(200).json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ error: "Failed to fetch user" });
+    }
+  });
+
+  // DELETE /api/users/:username
+  //Used for testing and debugging
+  router.delete("/:displayName",  async (req, res) => {
+  try {
+    const { displayName } = req.params;
+    const deletedUser = await User.findOneAndDelete({ displayName });
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "Post not found." });
+    }
+
+    res.status(200).json({ message: "Post deleted successfully." });
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting post.", error: err.message });
+  }
+});
+
 module.exports = router;

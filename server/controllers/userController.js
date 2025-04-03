@@ -8,7 +8,7 @@ const saveUser = async (req, res) => {
   }
 
   try {
-    let user = await User.findOne({ uid });
+    let user = await User.findOne({ uid });s
 
     if (!user) {
       user = new User({ uid, displayName, email, photoURL, emailVerified, providerId });
@@ -22,5 +22,6 @@ const saveUser = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
 
 module.exports = { saveUser };

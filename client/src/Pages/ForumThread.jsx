@@ -8,13 +8,16 @@ import replyCharacterMin from "/src/utilities/replyCharacterMin";
 const ForumThread = () => {
   const { postId } = useParams();
   const [post, setPost] = useState(null);
+  const [users, setUsers] = useState({});
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [replyText, setReplyText] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const repliesPerPage = 25;
 
   useEffect(() => {
+    setDisplayName(sessionStorage.getItem("displayName"));
     const fetchPost = async () => {
       try {
         const res = await axios.get(`http://localhost:5000/api/forum/id/${postId}`);
@@ -44,9 +47,10 @@ const ForumThread = () => {
       return;
     }
 
+    
     try {
       const res = await axios.post(`http://localhost:5000/api/forum/${postId}/reply`, {
-        userName: "Anonymous",
+        userName: displayName,
         contents: replyText,
       });
 
@@ -58,6 +62,30 @@ const ForumThread = () => {
       setErrorMessage("Failed to submit reply. Please try again.");
     }
   };
+  useEffect(() => {
+    if (post) {
+      //Fetch user for the original post
+      const fetchUser = async (userName) => {
+        try {
+          const encodedUserName = encodeURIComponent(userName);
+          const res = await axios.get(`http://localhost:5000/api/users/${encodedUserName}`);
+          setUsers((prevUsers) => ({ ...prevUsers, [userName]: res.data }));
+        } catch (err) {
+          console.error("Failed to fetch user:", err);
+        }
+      };
+
+      //Fetch user for the original post
+      fetchUser(post.userName);
+
+      //Fetch user for each reply
+      post.replies.forEach((reply) => {
+        if (!users[reply.userName]) { //Avoid re-fetching the same user
+          fetchUser(reply.userName);
+        }
+      });
+    }
+  }, [post, users]); //Run when post or users change
 
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -77,7 +105,14 @@ const ForumThread = () => {
       <div className="news-card-wrapper original-post-wrapper">
         <div className="news-cards-container">
           <div className="news-card">
-            <div className="meta-container"></div>
+            <div className="meta-container">
+            <p>{post.userName}</p>
+              {/* Check if user exists before rendering image */}
+              {users[post.userName] && users[post.userName].photoURL && (
+                <img src={users[post.userName].photoURL} alt={`${post.userName}'s profile`} width={100} height={100} />
+              )}
+            </div>
+            
             <div className="news-card-content">
               <p>{post.contents}</p>
             </div>
@@ -93,7 +128,13 @@ const ForumThread = () => {
             <div className="news-cards-container">
               {currentReplies.map((reply, index) => (
                 <div key={index} className="news-card">
-                  <div className="meta-container"></div>
+                  <div className="meta-container">
+                  <p>{reply.userName}</p>
+                    {/* Check if user exists before rendering image */}
+                    {users[reply.userName] && users[reply.userName].photoURL && (
+                      <img src={users[reply.userName].photoURL} alt={`${reply.userName}'s profile`} width={100} height={100} />
+                    )}
+                  </div>
                   <div className="news-card-content">
                     <p>{reply.contents}</p>
                   </div>
