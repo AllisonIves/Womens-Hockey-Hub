@@ -23,7 +23,14 @@ const ForumCategory = () => {
     const fetchPosts = async () => {
       try {
         const res = await axios.get(`http://localhost:5000/api/forum/category/${category}`);
-        setPosts(res.data);
+        
+        //Sort the posts so that isPinned = true posts appear first
+        const sortedPosts = res.data.sort((a, b) => {
+          //Sort pinned posts first
+          if (a.isPinned === b.isPinned) return 0;
+          return a.isPinned ? -1 : 1;  //If a.isPinned is true, it comes first, else, it comes after b
+        });
+        setPosts(sortedPosts); //Set the sorted posts as posts
         setLoading(false);
       } catch (err) {
         console.error("Failed to fetch posts:", err);
@@ -85,6 +92,7 @@ const ForumCategory = () => {
                 >
                   <div className="meta-container" />
                   <div className="news-card-content">
+                  {post.isPinned && (<div className="pin-icon">📌</div>)}
                     <p>{post.contents.slice(0, 300)}...</p>
                   </div>
                 </Link>
