@@ -13,7 +13,7 @@ const Login = () => {
 
       // Store emailVerified status as a string in sessionStorage
       sessionStorage.setItem("emailVerified", user.emailVerified ? "true" : "false");
-      sessionStorage.setItem("displayName0", user.displayName);
+      sessionStorage.setItem("displayName", user.displayName);
 
       // Send user info to backend
       const response = await fetch("http://localhost:5000/api/users", {

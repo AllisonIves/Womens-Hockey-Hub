@@ -4,6 +4,7 @@ import axios from "axios";
 import "/src/styles/news.css";
 
 
+
 const ForumCategory = () => {
   const { category } = useParams();
   const [posts, setPosts] = useState([]);
@@ -14,8 +15,11 @@ const ForumCategory = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [postText, setPostText] = useState("");
   const itemsPerPage = 25;
+  const [displayName, setDisplayName] = useState("");
 
   useEffect(() => {
+    setDisplayName(sessionStorage.getItem("displayName"));
+
     const fetchPosts = async () => {
       try {
         const res = await axios.get(`http://localhost:5000/api/forum/category/${category}`);
@@ -36,7 +40,7 @@ const ForumCategory = () => {
 
     try {
       const res = await axios.post('http://localhost:5000/api/forum/', {
-        userName: "Anonymous", //Set to Google user's name in next update
+        userName: displayName,
         contents: postText,
         Category: category
       });
