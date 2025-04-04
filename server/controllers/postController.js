@@ -1,8 +1,5 @@
-const fs = require('fs');
 const Post = require('../models/post');
-const bannedWords_path = 'bannedWords.json';
 
-const bannedWordsList = JSON.parse(fs.readFileSync(bannedWords_path)).bannedWordsList;
 //REST API
 
 //GET /api/post
@@ -102,8 +99,6 @@ exports.createForumPost = [
 ];
 
 //UPDATE forum post
-
-
 
 exports.updateForumPost = [
   //Validation (just type for now)
@@ -240,27 +235,21 @@ exports.updateReply = [
     }
   ];
 
-
-exports.deletePostById = async(req, res) => {
+  // DELETE /api/forum/id/:id
+exports.deletePostById = async (req, res) => {
   try {
-    const {thisId} = req.params;
-    const post = await Post.findOne({thisId});
-    const {contents} = req.body;
-    
-    if (!post)
-    {
-        return res.status(400).json({message: "Post not found"});
+    const { id } = req.params;
+    const deletedPost = await Post.findOneAndDelete({ id });
+
+    if (!deletedPost) {
+      return res.status(404).json({ message: "Post not found." });
     }
 
-    post.contents = "This post has been deleted";
-    const deletedPost = await post.save();
-
-    res.status(200).json(deletedPost);
-  }catch(error)
-  {
-    res.status(500).json({message: "Error"});
+    res.status(200).json({ message: "Post deleted successfully." });
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting post.", error: err.message });
   }
-}
+};
 
 // DELETE ALL /api/forum
 exports.deleteAllPosts = async (req, res) => {
