@@ -12,6 +12,7 @@ const ForumThread = () => {
   const [users, setUsers] = useState({});
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [postText, setPostText] = useState("");
   const [replyText, setReplyText] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -62,6 +63,35 @@ const ForumThread = () => {
       setErrorMessage("Failed to submit reply. Please try again.");
     }
   };
+
+  const handleDeleteReply = async(replyId) => {
+    try {
+      const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}/${replyId}`, {
+        userName: displayName,
+        contents: "This post has been deleted",
+    });
+
+        setReplyText(res.data);
+        
+  }catch(error){
+          console.error("Failed to delete message");
+      }
+    }
+
+
+  const handleDelete = async(postId) => {
+    try {
+      const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}`, {
+        userName: displayName,
+        contents: "This post has been deleted",
+    });
+
+        setPost(res.data);
+        setReplyText("");
+  }catch(error){
+          console.error("Failed to delete message");
+      }
+    }
 
   const handleEditReply = async (replyId, isDelete) => {
     setErrorMessage("");
@@ -171,6 +201,7 @@ const ForumThread = () => {
               <hr />
               <p>{formatDate(post.createdAt)}</p>
             </div>
+            <button className="deleteButton" onClick={() => handleDelete(post.id)}>Delete</button>
             <div className="news-card-content">
               <p>{post.contents}</p>
               {post.isEdited && <div className="edited-icon">✎</div>}
@@ -199,7 +230,7 @@ const ForumThread = () => {
                     <div className="edit-delete-container">
                       {reply.isEdited && <div className="edited-icon">✎</div>}
                       <button className="edit-button" onClick={() => handleEditReply(reply._id, false)}>Edit</button>
-                      <button className="delete-button" onClick={() => handleEditReply(reply._id, true)}>Delete</button>
+                      <button className="delete-button" onClick={() => handleDeleteReply(reply._id)}>Delete</button>
                     </div>
                   </div>
                 </div>
