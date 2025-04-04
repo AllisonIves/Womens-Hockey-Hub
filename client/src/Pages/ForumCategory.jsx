@@ -5,6 +5,8 @@ import "/src/styles/news.css";
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import ReactTimeAgo from 'react-time-ago';
+import replyCharacterLimit from "/src/utilities/replyCharacterLimit";
+import replyCharacterMin from "/src/utilities/replyCharacterMin";
 
 
 // Register the locale data
@@ -51,6 +53,20 @@ const ForumCategory = () => {
   const handleSubmitPost = async () => {
     setErrorMessage("");
   
+    // Validate minimum character count
+    const minResult = replyCharacterMin(postText);
+    if (!minResult.isValid) {
+      setErrorMessage(minResult.message);
+      return;
+    }
+  
+    // Validate maximum character count
+    const limitResult = replyCharacterLimit(postText);
+    if (!limitResult.isValid) {
+      setErrorMessage(limitResult.message);
+      return;
+    }
+  
     try {
       const res = await axios.post("http://localhost:5000/api/forum/", {
         userName: displayName,
@@ -58,25 +74,22 @@ const ForumCategory = () => {
         Category: category,
       });
   
-      // Add the new post to the top of the list
       const updatedPosts = [res.data, ...posts];
   
-      // Re-sort the posts with pinned posts first
       const sortedPosts = updatedPosts.sort((a, b) => {
         if (a.isPinned === b.isPinned) return 0;
         return a.isPinned ? -1 : 1;
       });
   
-      setPosts(sortedPosts); // Update posts list
-      setPostText(""); // Clear textarea
-      setShowPostForm(false); // Hide the form
-      setErrorMessage(""); // Clear error
+      setPosts(sortedPosts);
+      setPostText("");
+      setShowPostForm(false);
+      setErrorMessage("");
     } catch (error) {
       console.error("Failed to submit post:", error);
       setErrorMessage("Failed to submit post. Please try again.");
     }
   };
-  ;
 
   const handleStartThreadClick = () => {
     setShowPostForm(true); //Show the post form when the buttn is clicked
