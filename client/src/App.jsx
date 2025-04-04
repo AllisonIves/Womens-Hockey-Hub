@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, NavLink } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import News from "./Pages/News.jsx";
 import CommunityEventPage from "./CommunityEventPage";
@@ -65,27 +65,27 @@ const App = () => {
 
   return (
     <Router>
-      <nav>
-        <Link to="/">News </Link>
-        <Link to="/events">Community Events </Link>
-        {firebaseUser ? (
-          <>
-            <Link to="/post-event">Post Event </Link>
-            <Link to="/chat">Chat </Link>
-            <Link to="/logout">Logout </Link>
-            <Link to="/forum">Forum </Link>
-          </>
-        ) : (
-          <Link to="/login">Login </Link>
-        )}
-        <Link to="/contact">Contact </Link>
-      </nav>
+      <nav className="navbar">
+          <NavLink to="/" className="nav-link" activeclassname="active">News</NavLink>
+          <NavLink to="/events" className="nav-link" activeclassname="active">Community Events</NavLink>
+          {firebaseUser ? (
+            <>
+              <NavLink to="/post-event" className="nav-link" activeclassname="active">Post Event</NavLink>
+              <NavLink to="/chat" className="nav-link" activeclassname="active">Chat</NavLink>
+              <NavLink to="/logout" className="nav-link" activeclassname="active">Logout</NavLink>
+              <NavLink to="/forum" className="nav-link" activeclassname="active">Forum</NavLink>
+            </>
+          ) : (
+            <NavLink to="/login" className="nav-link" activeclassname="active">Login</NavLink>
+          )}
+          <NavLink to="/contact" className="nav-link" activeclassname="active">Contact</NavLink>
+        </nav>
 
-      {showPopup && (
-        <div className="inactivity-popup">
-          <p>You have been logged out due to inactivity.</p>
-        </div>
-      )}
+        {showPopup && (
+          <div className="inactivity-popup">
+            <p>You have been logged out due to inactivity.</p>
+          </div>
+        )}
 
       <Routes>
         <Route path="/" element={<News />} />
@@ -99,6 +99,11 @@ const App = () => {
         <Route path="/forum/category/:category" element={firebaseUser ? <ForumCategory /> : <Login />} />
         <Route path="/forum/thread/:postId" element={firebaseUser ? <ForumThread /> : <Login />} />
       </Routes>
+
+      <footer className="whh-footer">
+        Copyright &copy; Women's Hockey Hub COMP231 Sec401 Group 3
+      </footer>
+
     </Router>
   );
 };

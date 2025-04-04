@@ -38,21 +38,21 @@ const ForumLanding = () => {
       <h1 className="news-title">Forum Categories</h1>
 
       <div className="news-card-wrapper">
-        <div className="news-cards-container">
-          {categories.map((category, index) => (
-            <Link
-              to={`/forum/category/${encodeURIComponent(category)}`}
-              key={index}
-              className="news-card"
-            >
-              <div className="news-card-content">
-                <h3>{category}</h3>
-                <p>View threads in this category</p>
-              </div>
-            </Link>
-          ))}
+          <div className="news-cards-container">
+            {categories.map((category, index) => (
+              <Link
+                to={`/forum/category/${encodeURIComponent(category)}`}
+                key={index}
+                className="forum-category-card"
+              >
+                <div className="news-card-content">
+                  <h3>{category}</h3>
+                  <p>View threads in this category</p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
-      </div>
     </div>
   );
 };

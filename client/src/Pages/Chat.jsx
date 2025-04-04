@@ -106,8 +106,12 @@ function Chat() {
     return (
         <div>
             {isInLobby ? (
-                <button type="submit" onClick={handleEnterChat}>Enter Chat</button>
-            ) : (
+                <div className="chat-lobby">
+                    <button className="page-button" type="submit" onClick={handleEnterChat}>
+                    Enter Chat
+                    </button>
+                </div>
+                ) : (
                 <>
                     {/* Wrapper for chat and users */}
                     <div className="chat-wrapper">
