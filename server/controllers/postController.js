@@ -1,41 +1,37 @@
 const Post = require('../models/post');
+const containsBannedWord = require('../utilities/checkBannedWords');
 
-//REST API
+// REST API
 
-//GET /api/post
+// GET /api/post
 exports.getAllPosts = async (req, res) => {
-    try {
-        const posts = await Post.find();
-        res.json(posts);
-    } catch(err){
-        res.status(500).json({ message: err.message });
-    }
+  try {
+    const posts = await Post.find();
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
+
 exports.getPostsById = async (req, res) => {
-    try {
-        //Extract category from req parameters
-        const { postId } = req.params;
+  try {
+    const { postId } = req.params;
+    const post = await Post.findOne({ id: postId });
 
-        //Query the db
-        const post = await Post.findOne({ id: postId });
-
-        //No posts found handling
-        if (!post) {
-          return res.status(404).json({ message: "No post found with this ID." });
-        }
-
-        //Send the posts as a response
-        res.json(post);
-    } catch (err) {
-        //Handle any potential errors
-        res.status(500).json({ message: err.message });
+    if (!post) {
+      return res.status(404).json({ message: "No post found with this ID." });
     }
+
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
-//GET /api/post/category/:category
+
+// GET /api/post/category/:category
 exports.getPostsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
-
     const posts = await Post.find({ Category: category });
 
     if (!posts.length) {
@@ -48,13 +44,11 @@ exports.getPostsByCategory = async (req, res) => {
   }
 };
 
-//CREATE forum post
+// CREATE forum post
 const { body, validationResult } = require('express-validator');
 const { v4: uuidv4 } = require('uuid');
 
 exports.createForumPost = [
-  //Validation
-  //Expand contents validation to add min max characters -- should make util?
   body('contents').isString().notEmpty().withMessage('Contents are required'),
   body('Category').optional().isString(),
   body('isPinned').optional().isBoolean(),
@@ -62,27 +56,29 @@ exports.createForumPost = [
   body('replies').optional().isArray(),
 
   async (req, res) => {
-    //Check validation
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
+    const { userName, contents, Category, isEdited, isPinned, replies } = req.body;
+
+    if (containsBannedWord(contents)) {
+      return res.status(400).json({ error: "Your post contains banned word(s). Please remove them and try again." });
+    }
+
     try {
-        //Generate id
-        const id = uuidv4();
-        //use req body to assign the other attributes
-        const { userName, contents, Category, isEdited, isPinned, replies } = req.body;
-      
-        const newPost = new Post({
-            id,
-            userName,
-            contents,
-            Category,
-            isEdited,
-            isPinned,
-            replies
-        });
+      const id = uuidv4();
+
+      const newPost = new Post({
+        id,
+        userName,
+        contents,
+        Category,
+        isEdited,
+        isPinned,
+        replies
+      });
 
       const savedPost = await newPost.save();
       res.status(201).json(savedPost);
@@ -93,144 +89,128 @@ exports.createForumPost = [
   }
 ];
 
-//UPDATE forum post
-
+// UPDATE forum post
 exports.updateForumPost = [
-  //Validation (just type for now)
-    body('contents').optional().isString().withMessage('Contents must be a string'),
-    body('isEdited').optional().isBoolean().withMessage('isEdited must be a boolean'),
+  body('contents').optional().isString().withMessage('Contents must be a string'),
+  body('isEdited').optional().isBoolean().withMessage('isEdited must be a boolean'),
 
-    async (req, res) => {
-        
-    //Check validation
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
-        const { contents} = req.body;
+    const { contents } = req.body;
 
-        try {
-            //Find the post by id
-            const { postId } = req.params;
-            const post = await Post.findOne({ id: postId});
-            if (!post) {
-                return res.status(404).json({ error: 'Post not found' }); //Not found handling
-            }
+    if (contents && containsBannedWord(contents)) {
+      return res.status(400).json({ error: "Your post contains banned word(s). Please remove them and try again." });
+    }
 
+    try {
+      const { postId } = req.params;
+      const post = await Post.findOne({ id: postId });
 
-            //Update fields (if provided)
-            if (contents !== undefined) {
-                post.contents = contents;
-                post.isEdited = true; //Set isEdited boolean to true if content is updated
-            }
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
 
+      if (contents !== undefined) {
+        post.contents = contents;
+        post.isEdited = true;
+      }
 
-            //Save updated post
-            const updatedPost = await post.save();
-
-            res.status(200).json(updatedPost);
-
-        } catch (error) {
-            console.error("Error updating:", error);
-            res.status(500).json({ error: 'Failed to update' });
+      const updatedPost = await post.save();
+      res.status(200).json(updatedPost);
+    } catch (error) {
+      console.error("Error updating:", error);
+      res.status(500).json({ error: 'Failed to update' });
     }
   }
 ];
 
-
-//Reply CRUD
-//POST /api/post/:postId/reply
+// CREATE reply
 exports.createReply = [
-    //Validation for the reply content
-    body('contents').isString().notEmpty().withMessage('Reply cannot be empty'),
-  
-    async (req, res) => {
-      //Check validation
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-  
-      try {
-        const { userName, contents, isEdited} = req.body; //Extract body
-        const { postId } = req.params; //Extract postId from the request parameters
+  body('contents').isString().notEmpty().withMessage('Reply cannot be empty'),
 
-        //Find the post by string id
-        const post = await Post.findOne({ id: postId });
-  
-        if (!post) {
-          return res.status(404).json({ message: "Post not found" });
-        }
-  
-        //Create the reply object
-        const newReply = {
-          userName,
-          contents,
-          isEdited: false,//dEfault false
-        };
-  
-        //Add new reply to replies array
-        post.replies.push(newReply);
-  
-        //Save post with new reply
-        const updatedPost = await post.save();
-  
-        //Respond with the updated post
-        res.status(201).json(updatedPost);
-      } catch (error) {
-        console.error("Error creating reply:", error);
-        res.status(500).json({ error: "Failed to create reply" });
-      }
-    },
-  ];
-
-exports.updateReply = [
-    // Validation for the reply content
-    body('contents').optional().isString().withMessage('Reply content must be a string'),
-  
-    async (req, res) => {
-        // Check validation
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-  
-        const { contents } = req.body; //Extract the contents from the request body
-        const { postId, replyId } = req.params; //Extract postId and replyId from the request params
-  
-        try {
-            //Find the post by postId
-            const post = await Post.findOne({ id: postId });
-            if (!post) {
-                return res.status(404).json({ message: "Post not found" });
-            }
-  
-            //Find the reply by replyId within the post's replies
-            const reply = post.replies.id(replyId); //Set reply as the reply with provided replyId from replies array
-            if (!reply) {
-            return res.status(404).json({ message: "Reply not found" });
-            }
-  
-            //Update the contents (if provided)
-            if (contents !== undefined) {
-            reply.contents = contents;
-            reply.isEdited = true; //Set isEdited to true when the reply is updated
-            }
-  
-            //Save updated post
-            const updatedPost = await post.save();
-  
-            //Respond with the updated post
-            res.status(200).json(updatedPost);
-        } catch (error) {
-            console.error("Error updating reply:", error);
-            res.status(500).json({ error: "Failed to update reply" });
-        }
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-  ];
 
-  // DELETE /api/forum/id/:id
+    const { userName, contents } = req.body;
+    const { postId } = req.params;
+
+    if (containsBannedWord(contents)) {
+      return res.status(400).json({ error: "Your reply contains banned word(s). Please remove them and try again." });
+    }
+
+    try {
+      const post = await Post.findOne({ id: postId });
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+
+      const newReply = {
+        userName,
+        contents,
+        isEdited: false,
+      };
+
+      post.replies.push(newReply);
+      const updatedPost = await post.save();
+
+      res.status(201).json(updatedPost);
+    } catch (error) {
+      console.error("Error creating reply:", error);
+      res.status(500).json({ error: "Failed to create reply" });
+    }
+  }
+];
+
+// UPDATE reply
+exports.updateReply = [
+  body('contents').optional().isString().withMessage('Reply content must be a string'),
+
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { contents } = req.body;
+    const { postId, replyId } = req.params;
+
+    if (contents && containsBannedWord(contents)) {
+      return res.status(400).json({ error: "Your reply contains banned word(s). Please remove them and try again." });
+    }
+
+    try {
+      const post = await Post.findOne({ id: postId });
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+
+      const reply = post.replies.id(replyId);
+      if (!reply) {
+        return res.status(404).json({ message: "Reply not found" });
+      }
+
+      if (contents !== undefined) {
+        reply.contents = contents;
+        reply.isEdited = true;
+      }
+
+      const updatedPost = await post.save();
+      res.status(200).json(updatedPost);
+    } catch (error) {
+      console.error("Error updating reply:", error);
+      res.status(500).json({ error: "Failed to update reply" });
+    }
+  }
+];
+
+// DELETE /api/forum/id/:id
 exports.deletePostById = async (req, res) => {
   try {
     const { id } = req.params;

@@ -87,7 +87,11 @@ const ForumCategory = () => {
       setErrorMessage("");
     } catch (error) {
       console.error("Failed to submit post:", error);
-      setErrorMessage("Failed to submit post. Please try again.");
+      if (error.response?.data?.error?.toLowerCase().includes("banned")) {
+        setErrorMessage("Your post contains banned word(s). Please remove them and try again.");
+      } else {
+        setErrorMessage("Failed to submit post. Please try again.");
+      }
     }
   };
 

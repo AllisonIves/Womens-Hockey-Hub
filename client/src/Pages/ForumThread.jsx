@@ -5,7 +5,6 @@ import "/src/styles/news.css";
 import replyCharacterLimit from "/src/utilities/replyCharacterLimit";
 import replyCharacterMin from "/src/utilities/replyCharacterMin";
 
-
 const ForumThread = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
@@ -13,7 +12,6 @@ const ForumThread = () => {
   const [users, setUsers] = useState({});
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [postText, setPostText] = useState("");
   const [replyText, setReplyText] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -58,7 +56,11 @@ const ForumThread = () => {
       setReplyText("");
     } catch (error) {
       console.error("Failed to submit reply:", error);
-      setErrorMessage("Failed to submit reply. Please try again.");
+      if (error.response?.data?.error?.toLowerCase().includes("banned")) {
+        setErrorMessage("Your reply contains banned word(s). Please remove them and try again.");
+      } else {
+        setErrorMessage("Failed to submit reply. Please try again.");
+      }
     }
   };
 
@@ -112,10 +114,9 @@ const ForumThread = () => {
   // Submit edited reply
   const handleEditSubmit = async (replyId) => {
     const minResult = replyCharacterMin(editReplyText);
-    if (!minResult.isValid) return setErrorMessage(minResult.message);
-
+    if (!minResult.isValid) return alert(minResult.message);
     const result = replyCharacterLimit(editReplyText);
-    if (!result.isValid) return setErrorMessage(result.message);
+    if (!result.isValid) return alert(result.message);
 
     try {
       const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}/${replyId}`, {
@@ -127,9 +128,15 @@ const ForumThread = () => {
       setEditReplyText("");
     } catch (error) {
       console.error("Failed to edit reply:", error);
-      setErrorMessage("Failed to edit reply. Please try again.");
+      if (error.response?.data?.error?.toLowerCase().includes("banned")) {
+        alert("Your reply contains banned word(s). Please remove them and try again.");
+      } else {
+        alert("Failed to edit reply. Please try again.");
+      }
     }
   };
+
+  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   // Fetch user data for post and replies
   useEffect(() => {
@@ -165,9 +172,6 @@ const ForumThread = () => {
     })}`;
   };
 
-  // Change reply page
-  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
-
   // Conditional loading states
   if (loading) return <div className="news-page"><p>Loading thread...</p></div>;
   if (!post) return <div className="news-page"><p>Thread not found.</p></div>;
@@ -183,7 +187,6 @@ const ForumThread = () => {
     <div className="news-page">
       <h1 className="news-title">Thread View</h1>
 
-      {/* Main Post */}
       <div className="news-card-wrapper original-post-wrapper">
         <div className="news-cards-container">
           <div className="news-card">
@@ -206,9 +209,9 @@ const ForumThread = () => {
                   <div className="edit-delete-container">
                     <button className="edit-button" onClick={async () => {
                       const min = replyCharacterMin(editPostText);
-                      if (!min.isValid) return setErrorMessage(min.message);
+                      if (!min.isValid) return alert(min.message);
                       const max = replyCharacterLimit(editPostText);
-                      if (!max.isValid) return setErrorMessage(max.message);
+                      if (!max.isValid) return alert(max.message);
 
                       try {
                         const res = await axios.put(`http://localhost:5000/api/forum/id/${post.id}`, {
@@ -221,7 +224,11 @@ const ForumThread = () => {
                         setEditPostText("");
                       } catch (error) {
                         console.error("Failed to update post:", error);
-                        setErrorMessage("Failed to update post. Please try again.");
+                        if (error.response?.data?.error?.toLowerCase().includes("banned")) {
+                          alert("Your post contains banned word(s). Please remove them and try again.");
+                        } else {
+                          alert("Failed to update post. Please try again.");
+                        }
                       }
                     }}>
                       Submit

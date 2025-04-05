@@ -1,7 +1,5 @@
 const fs = require('fs');
-const bannedWordsPath = 'bannedWords.json';
-// Load banned words from JSON file
-const bannedWords = JSON.parse(fs.readFileSync(bannedWordsPath)).bannedWords;
+const containsBannedWord = require('../utilities/checkBannedWords');
 
 // Disconnect all users function for testing purposes, to be removed
 function disconnectAllUsers(io) {
@@ -35,35 +33,29 @@ module.exports = function (io) {
         // Send current room states
         socket.emit('roomList', usersByRoom);
 
-            //Handle new user joining
-            socket.on('userJoin', (username) => {
+        // Handle new user joining
+        socket.on('userJoin', (username) => {
+            const room = assignRoom(); // Get a room with space
+            socket.room = room;
+            socket.username = username;
 
-                const room = assignRoom(); // Get a room with space
-                socket.room = room;
-                socket.username = username;
+            usersByRoom[room].push(username);
+            socket.join(room);
 
-                usersByRoom[room].push(username);
-                socket.join(room);
+            // Send room name back to user
+            socket.emit('roomJoined', room);
 
-                // Send room name back to user
-                socket.emit('roomJoined', room);
+            console.log(`User ${username} joined ${room}`);
 
-                console.log(`User ${username} joined ${room}`);
-
-                // Send updated user list for this room
-                io.to(room).emit('userList', usersByRoom[room]);
-            });
-
+            // Send updated user list for this room
+            io.to(room).emit('userList', usersByRoom[room]);
+        });
 
         // Handle message sending
         socket.on('sendMessage', (data) => {
-            let message = data.message.toLowerCase();
+            const message = data.message;
 
-            // Check if the message contains any banned words
-            let containsBannedWord = bannedWords.some(word => message.includes(word));
-
-            if (containsBannedWord) {
-                // Emit banned word only to the user who sent the message
+            if (containsBannedWord(message)) {
                 socket.emit('bannedWord', 'Your message contains a banned word. Try again.');
             } else {
                 if (socket.room) {
