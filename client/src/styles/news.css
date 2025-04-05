@@ -45,6 +45,10 @@
   scrollbar-color: var(--WHH-Light-Blue) transparent;
 }
 
+.news-card-content {
+  padding: 1rem 1.25rem;
+}
+
 /* News card container (holds multiple cards) */
 .news-cards-container {
   display: flex;
@@ -286,8 +290,14 @@
   width: 150px;
   min-height: 100%;
   background-color: var(--WHH-Blue);
+  color: white;
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 /* ForumLanding-specific card wrapper and card styles */
@@ -418,4 +428,18 @@
   font-size: 1rem;
   color: var(--WHH-Blue);
   line-height: 1.6;
+}
+
+/* Edit reply area styling */
+.edit-reply-textarea {
+  min-height: 120px;
+  max-height: 300px;
+  margin: 0.5rem auto;
+  font-size: 1rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  resize: both;
+  box-sizing: border-box;
+  display: block;
 }
