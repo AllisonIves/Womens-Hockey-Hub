@@ -31,11 +31,13 @@ const Logout = () => {
   };
 
   return (
-    <div className="login-container">
-      <h2 className="login-title">Are you sure you want to log out?</h2>
-      <button onClick={handleLogout} className="google-login-button">
-        Log Out
-      </button>
+    <div className="login-wrapper">
+      <div className="login-container">
+        <h2 className="login-title">Are you sure you want to log out?</h2>
+        <button onClick={handleLogout} className="google-login-button">
+          Log Out
+        </button>
+      </div>
     </div>
   );
 };

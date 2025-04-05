@@ -39,7 +39,7 @@ const App = () => {
     let timeout;
 
     const logoutForInactivity = async () => {
-      console.log("🔒 Logging out due to inactivity");
+      console.log("Logging out due to inactivity");
       await signOut(auth);
       sessionStorage.setItem("emailVerified", "false");
       sessionStorage.removeItem("displayName");
@@ -65,7 +65,8 @@ const App = () => {
 
   return (
     <Router>
-      <nav className="navbar">
+      <div className="layout-container">
+        <nav className="navbar">
           <NavLink to="/" className="nav-link" activeclassname="active">News</NavLink>
           <NavLink to="/events" className="nav-link" activeclassname="active">Community Events</NavLink>
           {firebaseUser ? (
@@ -87,23 +88,25 @@ const App = () => {
           </div>
         )}
 
-      <Routes>
-        <Route path="/" element={<News />} />
-        <Route path="/events" element={<CommunityEventPage />} />
-        <Route path="/post-event" element={firebaseUser ? <CommunityEventForm /> : <Login />} />
-        <Route path="/chat" element={firebaseUser ? <Chat /> : <Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/logout" element={<Logout />} />
-        <Route path="/contact" element={<ContactForm />} />
-        <Route path="/forum" element={firebaseUser ? <ForumLanding /> : <Login />} />
-        <Route path="/forum/category/:category" element={firebaseUser ? <ForumCategory /> : <Login />} />
-        <Route path="/forum/thread/:postId" element={firebaseUser ? <ForumThread /> : <Login />} />
-      </Routes>
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<News />} />
+            <Route path="/events" element={<CommunityEventPage />} />
+            <Route path="/post-event" element={firebaseUser ? <CommunityEventForm /> : <Login />} />
+            <Route path="/chat" element={firebaseUser ? <Chat /> : <Login />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/contact" element={<ContactForm />} />
+            <Route path="/forum" element={firebaseUser ? <ForumLanding /> : <Login />} />
+            <Route path="/forum/category/:category" element={firebaseUser ? <ForumCategory /> : <Login />} />
+            <Route path="/forum/thread/:postId" element={firebaseUser ? <ForumThread /> : <Login />} />
+          </Routes>
+        </main>
 
-      <footer className="whh-footer">
-        Copyright &copy; Women's Hockey Hub COMP231 Sec401 Group 3
-      </footer>
-
+        <footer className="whh-footer">
+          Copyright &copy; Women's Hockey Hub COMP231 Sec401 Group 3
+        </footer>
+      </div>
     </Router>
   );
 };

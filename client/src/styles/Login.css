@@ -1,64 +1,66 @@
 /* WHH Color Variables */
 :root {
-    --WHH-Blue: #003049;
-    --WHH-Red: #c1121F;
-    --WHH-Light-Blue: #669BBC;
-    --WHH-Gray: #EBEDF0;
-  }
-  
-  /* Full-page center wrapper */
-  .login-wrapper {
-    height: 80vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--WHH-Gray);
-  }
-  
-  /* Card-style container */
-  .login-container {
-    background-color: white;
-    border: 2px solid var(--WHH-Blue);
-    border-radius: 10px;
-    padding: 30px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    max-width: 400px;
-    width: 100%;
-  }
-  
-  /* Title */
-  .login-title {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: var(--WHH-Blue);
-    margin-bottom: 20px;
-  }
-  
-  /* Google login button */
-  .google-login-button {
-    background-color: var(--WHH-Red);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-size: 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  
-  .google-login-button:hover {
-    background-color: var(--WHH-Light-Blue);
-  }
-  
-  .inactivity-popup {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: var(--WHH-Blue);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 5px;
-    z-index: 1000;
-    font-weight: bold;
-  }
+  --WHH-Blue: #003049;
+  --WHH-Red: #c1121F;
+  --WHH-Light-Blue: #669BBC;
+  --WHH-Gray: #EBEDF0;
+}
+
+/* Full-page center wrapper */
+.login-wrapper {
+  min-height: calc(100vh - 100px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--WHH-Gray);
+  padding: 2rem;
+}
+
+/* Card-style container */
+.login-container {
+  background-color: white;
+  border: 2px solid var(--WHH-Blue);
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+/* Title */
+.login-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--WHH-Blue);
+  margin-bottom: 20px;
+}
+
+/* Google login button */
+.google-login-button {
+  background-color: var(--WHH-Red);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.google-login-button:hover {
+  background-color: var(--WHH-Light-Blue);
+}
+
+/* Inactivity popup */
+.inactivity-popup {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--WHH-Blue);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 5px;
+  z-index: 1000;
+  font-weight: bold;
+}

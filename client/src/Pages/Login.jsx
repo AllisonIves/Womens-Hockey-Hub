@@ -42,11 +42,13 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <h2 className="login-title">Login to Women's Hockey Hub</h2>
-      <button onClick={signInWithGoogle} className="google-login-button">
-        Sign in with Google
-      </button>
+    <div className="login-wrapper">
+      <div className="login-container">
+        <h2 className="login-title">Login to Women's Hockey Hub</h2>
+        <button onClick={signInWithGoogle} className="google-login-button">
+          Sign in with Google
+        </button>
+      </div>
     </div>
   );
 };

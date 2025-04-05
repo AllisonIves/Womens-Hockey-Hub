@@ -341,7 +341,7 @@
 }
 
 .forum-category-card:nth-child(4n + 4) {
-  background-color: #4B5563; /* A new darker blue-gray, or replace with your own */
+  background-color: #4B5563;
   color: white;
 }
 
@@ -390,3 +390,32 @@
   z-index: 10;
 }
 
+/* Layout wrapper to push footer to bottom */
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Main content takes up available space */
+.main-content {
+  flex: 1;
+}
+
+/* ForumLanding rules container */
+.rules-card-wrapper {
+  background-color: white;
+  border: 2px solid var(--WHH-Blue);
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 95%;
+  max-width: 800px;
+}
+
+.rules-container {
+  font-size: 1rem;
+  color: var(--WHH-Blue);
+  line-height: 1.6;
+}

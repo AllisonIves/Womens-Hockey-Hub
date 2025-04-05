@@ -26,13 +26,45 @@ const ForumLanding = () => {
         <img src={Logo} alt="Women's Hockey Hub Logo" className="news-logo" />
       </div>
 
-      <div className="rules">
-        <div className="rules-container">
-          <p> Rules:</p>
-          <p> Don't be rude and/or racist </p>
-          <p> Do not start talking about divisive topics e.g politics </p>
-          <p> Do not spam and also self promotion is banned </p>
+      <div className="rules-card-wrapper">
+        <div className="rules">
+          <div className="rules-container">
+            <p>
+              Welcome to the Women’s Hockey Hub Forum! This is our community — a place to cheer,
+              connect, and celebrate the PWHL together. Here’s how we keep it great:
+            </p>
+
+            <p>
+              <strong>Keep it clean, and our sticks on the ice</strong><br />
+              <span>Play fair, be kind, and keep the vibe respectful.</span>
+            </p>
+
+            <p>
+              <strong>Pass the puck</strong><br />
+              <span>Make space for every voice. Let others share their thoughts too.</span>
+            </p>
+
+            <p>
+              <strong>Celebrate the game</strong><br />
+              <span>Win or lose, we're here for the love of hockey and the players who inspire us.</span>
+            </p>
+
+            <p>
+              <strong>Lift the team</strong><br />
+              <span>Encourage each other, share what you love, and help this community grow.</span>
+            </p>
+
+            <p>
+              <strong>Stay onside</strong><br />
+              <span>Keep posts hockey-related and in the right zone (aka: the right category).</span>
+            </p>
+
+            <p>
+              <strong>Stay out of the penalty box</strong><br />
+              <span>Be kind and be inclusive.</span>
+            </p>
           </div>
+        </div>
       </div>
 
       <h1 className="news-title">Forum Categories</h1>
