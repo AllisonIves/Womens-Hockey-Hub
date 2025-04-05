@@ -33,24 +33,19 @@ exports.getPostsById = async (req, res) => {
 };
 //GET /api/post/category/:category
 exports.getPostsByCategory = async (req, res) => {
-    try {
-        //Extract category from req parameters
-        const { category } = req.params;
+  try {
+    const { category } = req.params;
 
-        //Query the db
-        const posts = await Post.find({ Category: category });
+    const posts = await Post.find({ Category: category });
 
-        //No posts found handling
-        if (!posts.length) {
-            return res.status(404).json({ message: "No posts found for this category." });
-        }
-
-        //Send the posts as a response
-        res.json(posts);
-    } catch (err) {
-        //Handle any potential errors
-        res.status(500).json({ message: err.message });
+    if (!posts.length) {
+      return res.status(404).json({ message: "No posts found for this category." });
     }
+
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 //CREATE forum post

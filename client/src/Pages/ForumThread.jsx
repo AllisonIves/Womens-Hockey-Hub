@@ -64,34 +64,39 @@ const ForumThread = () => {
     }
   };
 
-  const handleDeleteReply = async(replyId) => {
+  const handleDeleteReply = async (replyId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this reply?");
+    if (!confirmDelete) return;
+
     try {
       const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}/${replyId}`, {
         userName: displayName,
         contents: "This post has been deleted",
-    });
+        isEdited: true,
+      });
 
-        setReplyText(res.data);
-        
-  }catch(error){
-          console.error("Failed to delete message");
-      }
+      setPost(res.data);
+    } catch (error) {
+      console.error("Failed to delete message");
     }
+  };
 
+  const handleDelete = async (postId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this thread?");
+    if (!confirmDelete) return;
 
-  const handleDelete = async(postId) => {
     try {
       const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}`, {
         userName: displayName,
         contents: "This post has been deleted",
-    });
+        isEdited: true,
+      });
 
-        setPost(res.data);
-        setReplyText("");
-  }catch(error){
-          console.error("Failed to delete message");
-      }
+      setPost(res.data);
+    } catch (error) {
+      console.error("Failed to soft-delete post:", error);
     }
+  };
 
   const handleEditReply = async (replyId, isDelete) => {
     setErrorMessage("");
@@ -123,18 +128,7 @@ const ForumThread = () => {
         setErrorMessage("Failed to edit reply. Please try again.");
       }
     } else {
-      try {
-        const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}/${replyId}`, {
-          contents: "This message has been deleted",
-        });
-
-        setPost(res.data);
-        setReplyText("");
-        setErrorMessage("");
-      } catch (error) {
-        console.error("Failed to delete reply:", error);
-        setErrorMessage("Failed to delete reply. Please try again.");
-      }
+      handleDeleteReply(replyId);
     }
   };
 
@@ -201,10 +195,17 @@ const ForumThread = () => {
               <hr />
               <p>{formatDate(post.createdAt)}</p>
             </div>
-            <button className="deleteButton" onClick={() => handleDelete(post.id)}>Delete</button>
             <div className="news-card-content">
               <p>{post.contents}</p>
               {post.isEdited && <div className="edited-icon">✎</div>}
+
+              {post.userName === displayName && post.contents !== "This post has been deleted" && (
+                <div className="edit-delete-container" style={{ marginTop: "1rem" }}>
+                  <button className="delete-button" onClick={() => handleDelete(post.id)}>
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -229,8 +230,12 @@ const ForumThread = () => {
                     <p>{reply.contents}</p>
                     <div className="edit-delete-container">
                       {reply.isEdited && <div className="edited-icon">✎</div>}
-                      <button className="edit-button" onClick={() => handleEditReply(reply._id, false)}>Edit</button>
-                      <button className="delete-button" onClick={() => handleDeleteReply(reply._id)}>Delete</button>
+                      {reply.userName === displayName && reply.contents !== "This post has been deleted" && (
+                        <>
+                          <button className="edit-button" onClick={() => handleEditReply(reply._id, false)}>Edit</button>
+                          <button className="delete-button" onClick={() => handleEditReply(reply._id, true)}>Delete</button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -238,15 +243,7 @@ const ForumThread = () => {
             </div>
           </div>
 
-          {/* Back and Pagination */}
-          <button
-            className="page-button"
-            onClick={() => navigate(-1)}
-            style={{ marginBottom: "1rem" }}
-          >
-            ← Back to Category
-          </button>
-
+          {/* Pagination */}
           <div className="pagination">
             {currentPage > 1 && (
               <button className="page-button" onClick={() => handlePageChange(currentPage - 1)}>Prev</button>
@@ -273,6 +270,15 @@ const ForumThread = () => {
       ) : (
         <p style={{ textAlign: "center", marginTop: "1rem" }}>No replies yet.</p>
       )}
+
+      {/* Back Button always visible */}
+      <button
+        className="page-button"
+        onClick={() => navigate(-1)}
+        style={{ marginTop: "1rem", marginBottom: "2rem" }}
+      >
+        ← Back to Category
+      </button>
 
       {/* Reply Form */}
       <div className="news-card-wrapper reply-form-wrapper">
