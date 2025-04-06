@@ -16,7 +16,6 @@ const ForumCategory = () => {
   const { category } = useParams();
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
-  const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showPostForm, setShowPostForm] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,12 +31,24 @@ const ForumCategory = () => {
       try {
         const res = await axios.get(`http://localhost:5000/api/forum/category/${category}`);
         
-        //Sort the posts so that isPinned = true posts appear first
-        const sortedPosts = res.data.sort((a, b) => {
-          //Sort pinned posts first
-          if (a.isPinned === b.isPinned) return 0;
-          return a.isPinned ? -1 : 1;  //If a.isPinned is true, it comes first, else, it comes after b
-        });
+      //Sort the posts so that posts with isPinned set to true appear first
+      const sortedPosts = res.data.sort((a, b) => {
+        // Sort pinned posts first
+        if (a.isPinned === b.isPinned) {
+          //If posts are both pinned or not pinned, sort by the last reply's createdAt timestamp
+          const aLastReply = a.replies.length > 0 
+            ? new Date(a.replies[a.replies.length - 1].createdAt) 
+            : new Date(a.createdAt); //Use post's timestamp if no replies
+          const bLastReply = b.replies.length > 0 
+            ? new Date(b.replies[b.replies.length - 1].createdAt) 
+            : new Date(b.createdAt); //Use post's timestamp if no replies
+
+          return bLastReply - aLastReply;  //Sort by latest reply or post createdAt date
+        }
+
+        return a.isPinned ? -1 : 1; //If a.isPinned is true, it comes first, else, it comes after b
+      });
+
         setPosts(sortedPosts); //Set the sorted posts as posts
         setLoading(false);
       } catch (err) {
@@ -99,19 +110,6 @@ const ForumCategory = () => {
     setShowPostForm(true); //Show the post form when the buttn is clicked
   };
 
-  const formatTimestamp = (timestamp) => {
-    const date = new Date(timestamp);
-    const options = {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      seconds: null,
-      hour12: true, //24 hour clocks are for the French and the military
-    };
-    return `${date.toLocaleDateString('en-US', options)}`; //Use US format to put year last
-  };
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   const indexOfLastItem = currentPage * itemsPerPage;
