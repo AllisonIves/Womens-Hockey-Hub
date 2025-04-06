@@ -6,7 +6,6 @@ const socketIo = require('socket.io');
 const path = require('path');
 
 // Import routes
-const projectRoutes = require('./routes/project');
 const communityEventRoutes = require('./routes/communityevent');
 const userRoutes = require('./routes/userRoutes');
 const newsRoutes = require('./routes/newsRoutes');
