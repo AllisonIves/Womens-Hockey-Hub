@@ -93,6 +93,7 @@ exports.createForumPost = [
 exports.updateForumPost = [
   body('contents').optional().isString().withMessage('Contents must be a string'),
   body('isEdited').optional().isBoolean().withMessage('isEdited must be a boolean'),
+  body('isPinned').optional().isBoolean().withMessage('isPinned must be a boolean'),
 
   async (req, res) => {
     const errors = validationResult(req);
@@ -100,7 +101,7 @@ exports.updateForumPost = [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { contents } = req.body;
+    const { contents, isPinned } = req.body;
 
     if (contents && containsBannedWord(contents)) {
       return res.status(400).json({ error: "Your post contains banned word(s). Please remove them and try again." });
@@ -116,6 +117,7 @@ exports.updateForumPost = [
 
       if (contents !== undefined) {
         post.contents = contents;
+        post.isPinned = isPinned;
         post.isEdited = true;
       }
 
