@@ -1,0 +1,13 @@
+{
+  "source": {
+    "include": [
+      "client/src",
+      "server"
+    ]
+  },
+  "opts": {
+    "destination": "./docs",
+    "recurse": true,
+    "template": "templates/default"
+  }
+}

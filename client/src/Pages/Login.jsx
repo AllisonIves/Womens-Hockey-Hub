@@ -7,6 +7,15 @@ import {
 import { auth, googleProvider } from "/src/firebase-config";
 import "/src/styles/Login.css";
 
+/**
+ * Login component handles user sign-in via Google using Firebase Authentication.
+ * On successful login, session persistence is set, user data is saved in sessionStorage,
+ * and a POST request is sent to the backend to register the user.
+ *
+ * @component
+ * @returns {JSX.Element} Rendered login page with Google sign-in button.
+ */
+
 const Login = () => {
   const signInWithGoogle = async () => {
     try {

@@ -3,6 +3,13 @@ import "/src/styles/news.css";
 import axios from "axios";
 import Logo from "/src/assets/Hockey.png";
 
+/**
+ * News component displays a paginated list of news articles.
+ * Users can click on a card to view a full article in an overlay.
+ *
+ * @component
+ * @returns {JSX.Element} Rendered news section with pagination and article overlay.
+ */
 const News = () => {
   const [articles, setArticles] = useState([]);
   const [selectedArticle, setSelectedArticle] = useState(null);
@@ -22,12 +29,21 @@ const News = () => {
     fetchNews();
   }, []);
 
-  // Handle opening and closing of article overlay
+  /**
+   * Opens the overlay with the selected article.
+   * @param {Object} article - The article to show in full.
+   */
   const handleCardClick = (article) => setSelectedArticle(article);
+  /** Closes the overlay view. */
   const handleCloseOverlay = () => setSelectedArticle(null);
 
-  // Pagination logic
+  /**
+   * Changes the current pagination page.
+   * @param {number} pageNumber - The new page number to view.
+   */
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+  
+  // Pagination logic
   const indexOfLastArticle = currentPage * articlesPerPage;
   const indexOfFirstArticle = indexOfLastArticle - articlesPerPage;
   const currentArticles = articles.slice(indexOfFirstArticle, indexOfLastArticle);

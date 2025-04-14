@@ -4,9 +4,18 @@ import "/src/styles/news.css";
 import Logo from "/src/assets/Hockey.png";
 import axios from "axios";
 
+/**
+ * ForumLanding component displays the landing page for the forum section.
+ * Shows forum guidelines and a list of all available forum categories.
+ * Clicking a category navigates the user to that category's threads.
+ *
+ * @component
+ * @returns {JSX.Element} Rendered forum landing page with logo, rules, and category cards.
+ */
 const ForumLanding = () => {
   const [categories, setCategories] = useState([]);
 
+  // Fetch forum categories on mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {

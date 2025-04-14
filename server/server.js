@@ -1,3 +1,13 @@
+/**
+ * Entry point for the Express backend server.
+ * 
+ * Sets up:
+ * - MongoDB connection
+ * - Express routes and middleware
+ * - WebSocket server with Socket.io for real-time chat
+ * - Static file serving for uploaded images and production frontend
+ */
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -14,6 +24,8 @@ const postRoutes = require('./routes/postRoutes');
 // Initialize app and server
 const app = express();
 const server = http.createServer(app);
+
+// Setup WebSocket server with CORS
 const io = socketIo(server, {
   cors: {
     origin: "http://localhost:5173",
@@ -23,7 +35,10 @@ const io = socketIo(server, {
 
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
+/**
+ * Connect to MongoDB using Mongoose
+ * We should move this to a .env file to keep private
+ */
 mongoose.connect('mongodb+srv://dleduc1:PWgzHeunLWNH22a3@cluster0.moibf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
 
 // Middleware

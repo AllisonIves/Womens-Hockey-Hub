@@ -5,6 +5,13 @@ import "/src/styles/news.css";
 import replyCharacterLimit from "/src/utilities/replyCharacterLimit";
 import replyCharacterMin from "/src/utilities/replyCharacterMin";
 
+/**
+ * ForumThread component displays a full discussion thread including the original post
+ * and all replies. Users can reply, edit, delete their own posts, and view paginated replies.
+ *
+ * @component
+ * @returns {JSX.Element} Rendered thread view with editable posts and paginated replies.
+ */
 const ForumThread = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
@@ -64,7 +71,10 @@ const ForumThread = () => {
     }
   };
 
-  // Soft delete a reply
+  /**
+   * Soft deletes a reply by updating its content.
+   * @param {string} replyId - ID of the reply to delete
+   */
   const handleDeleteReply = async (replyId) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this reply?");
     if (!confirmDelete) return;
@@ -81,7 +91,10 @@ const ForumThread = () => {
     }
   };
 
-  // Soft delete the main post
+  /**
+   * Soft deletes the original thread post.
+   * @param {string} postId - ID of the post to delete
+   */
   const handleDelete = async (postId) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this thread?");
     if (!confirmDelete) return;
@@ -98,7 +111,11 @@ const ForumThread = () => {
     }
   };
 
-  // Start editing a reply
+  /**
+   * Enables editing mode for a reply.
+   * @param {string} replyId - ID of the reply to edit
+   * @param {string} currentText - Existing reply content
+   */
   const handleEditClick = (replyId, currentText) => {
     setEditingReplyId(replyId);
     setEditReplyText(currentText);
@@ -111,7 +128,10 @@ const ForumThread = () => {
     setEditReplyText("");
   };
 
-  // Submit edited reply
+  /**
+   * Submits the edited reply to the server.
+   * @param {string} replyId - ID of the reply being edited
+   */
   const handleEditSubmit = async (replyId) => {
     const minResult = replyCharacterMin(editReplyText);
     if (!minResult.isValid) return alert(minResult.message);
@@ -135,7 +155,11 @@ const ForumThread = () => {
       }
     }
   };
-
+  
+  /**
+   * Changes the current page number for reply pagination.
+   * @param {number} pageNumber - The new page number
+   */
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   // Fetch user data for post and replies
@@ -158,7 +182,11 @@ const ForumThread = () => {
     }
   }, [post, users]);
 
-  // Format date string
+    /**
+   * Formats a UTC date string into a readable format.
+   * @param {string} dateString - The ISO date string
+   * @returns {string} A formatted date string
+   */
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return `${date.toLocaleDateString("en-US", {
@@ -176,7 +204,7 @@ const ForumThread = () => {
   if (loading) return <div className="news-page"><p>Loading thread...</p></div>;
   if (!post) return <div className="news-page"><p>Thread not found.</p></div>;
 
-  // Calculate pagination logic
+  // Pagination logic
   const indexOfLastReply = currentPage * repliesPerPage;
   const indexOfFirstReply = indexOfLastReply - repliesPerPage;
   const currentReplies = post.replies.slice(indexOfFirstReply, indexOfLastReply);

@@ -2,9 +2,22 @@ import React from "react";
 import { getAuth, signOut } from "firebase/auth";
 import "/src/styles/Login.css";
 
+/**
+ * Logout component logs the user out of Firebase, clears session flags,
+ * notifies the backend, and redirects to the login page.
+ *
+ * @component
+ * @returns {JSX.Element} Rendered logout confirmation page.
+ */
 const Logout = () => {
   const auth = getAuth();
 
+   /**
+   * Handles user logout.
+   * - Signs out the user from Firebase.
+   * - Clears email verification status from sessionStorage.
+   * - Redirects to the login page.
+   */
   const handleLogout = async () => {
     try {
       const user = auth.currentUser;

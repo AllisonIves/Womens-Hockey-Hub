@@ -1,6 +1,15 @@
+/**
+ * @file Controller for managing news posts on homepage.
+ * Provides routes for creating, retrieving, updating, and deleting news articles.
+ */
+
 const NewsPost = require("../models/NewsPost");
 
-// Create a new news post
+/**
+ * Creates a new news post.
+ * @route POST /api/news
+ * @access Admin
+ */
 const createNewsPost = async (req, res) => {
   try {
     const { title, content, author, imageURL, tags } = req.body;
@@ -21,7 +30,11 @@ const createNewsPost = async (req, res) => {
   }
 };
 
-// Get all news posts (sorted by most recent)
+/**
+ * Fetches all news posts, sorted by most recent.
+ * @route GET /api/news
+ * @access Public
+ */
 const getAllNewsPosts = async (req, res) => {
   try {
     const posts = await NewsPost.find().sort({ postedAt: -1 });
@@ -32,7 +45,11 @@ const getAllNewsPosts = async (req, res) => {
   }
 };
 
-// Get a single news post by ID
+/**
+ * Fetches a single news post by ID.
+ * @route GET /api/news/:id
+ * @access Public
+ */
 const getNewsPostById = async (req, res) => {
   try {
     const post = await NewsPost.findById(req.params.id);
@@ -44,7 +61,11 @@ const getNewsPostById = async (req, res) => {
   }
 };
 
-// Update a news post by ID
+/**
+ * Updates a news post by ID.
+ * @route PUT /api/news/:id
+ * @access Admin
+ */
 const updateNewsPost = async (req, res) => {
   try {
     const { title, content, author, imageURL, tags } = req.body;
@@ -70,7 +91,11 @@ const updateNewsPost = async (req, res) => {
   }
 };
 
-// Delete a news post by ID
+/**
+ * Deletes a news post by ID.
+ * @route DELETE /api/news/:id
+ * @access Admin
+ */
 const deleteNewsPost = async (req, res) => {
   try {
     const deletedPost = await NewsPost.findByIdAndDelete(req.params.id);

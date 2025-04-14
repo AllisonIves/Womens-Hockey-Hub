@@ -1,3 +1,14 @@
+/**
+ * Opens a new tab to share content on a specified social media platform.
+ *
+ * @param {string} platform - The platform to share on.
+ * @param {string} eventName - The title or name of the event to share.
+ * @param {string} eventDescription - The description of the event to share.
+ *
+ * @returns {void}
+ * @note This function opens a new browser tab/window with the share link.
+ */
+
 function shareToSocial(platform, eventName, eventDescription){
     let postText = eventName + " | " + eventDescription;
     let encodedText = encodeURIComponent(postText);

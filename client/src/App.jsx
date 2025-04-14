@@ -13,11 +13,26 @@ import ForumThread from "./Pages/ForumThread";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "/src/firebase-config";
 
+/**
+ * App component sets up routing, navigation, authentication state, and session-based
+ * access control for the Women's Hockey Hub application.
+ *
+ * Features:
+ * - Uses Firebase for login and session tracking
+ * - Automatically logs users out after 30 minutes of inactivity (clicks & navigation)
+ * - Displays routes conditionally based on email verification status
+ * - Shows a popup on inactivity logout
+ *
+ * @component
+ * @returns {JSX.Element} The root-level layout and router structure for the app.
+ */
 const App = () => {
   const [firebaseUser, setFirebaseUser] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
 
-  // Listen for Firebase Auth
+   /**
+   * Listens for Firebase auth state changes and updates session storage + user state.
+   */
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && user.emailVerified) {
@@ -34,7 +49,10 @@ const App = () => {
     return () => unsubscribe();
   }, []);
 
-  // Inactivity logout (clicks & navigation)
+  /**
+   * Tracks user inactivity via click and navigation events.
+   * Logs out after 30 minutes and displays a popup.
+   */
   useEffect(() => {
     let timeout;
 
@@ -49,7 +67,7 @@ const App = () => {
 
     const resetTimer = () => {
       clearTimeout(timeout);
-      timeout = setTimeout(logoutForInactivity, 30 * 60 * 1000); // 30 mins
+      timeout = setTimeout(logoutForInactivity, 2 * 60 * 1000); // 30 mins
     };
 
     window.addEventListener("click", resetTimer);

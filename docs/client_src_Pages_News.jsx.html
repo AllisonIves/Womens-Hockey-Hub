@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: client/src/Pages/News.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: client/src/Pages/News.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useEffect, useState } from "react";
+import "/src/styles/news.css";
+import axios from "axios";
+import Logo from "/src/assets/Hockey.png";
+
+/**
+ * News component displays a paginated list of news articles.
+ * Users can click on a card to view a full article in an overlay.
+ *
+ * @component
+ * @returns {JSX.Element} Rendered news section with pagination and article overlay.
+ */
+const News = () => {
+  const [articles, setArticles] = useState([]);
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const articlesPerPage = 10;
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/news");
+        setArticles(res.data);
+      } catch (err) {
+        console.error("Failed to fetch news", err);
+      }
+    };
+
+    fetchNews();
+  }, []);
+
+  /**
+   * Opens the overlay with the selected article.
+   * @param {Object} article - The article to show in full.
+   */
+  const handleCardClick = (article) => setSelectedArticle(article);
+  /** Closes the overlay view. */
+  const handleCloseOverlay = () => setSelectedArticle(null);
+
+  /**
+   * Changes the current pagination page.
+   * @param {number} pageNumber - The new page number to view.
+   */
+  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+  
+  // Pagination logic
+  const indexOfLastArticle = currentPage * articlesPerPage;
+  const indexOfFirstArticle = indexOfLastArticle - articlesPerPage;
+  const currentArticles = articles.slice(indexOfFirstArticle, indexOfLastArticle);
+  const totalPages = Math.ceil(articles.length / articlesPerPage);
+
+  return (
+    &lt;div className="news-page">
+      {/* Logo */}
+      &lt;div className="news-logo-container">
+        &lt;img src={Logo} alt="Women's Hockey Hub Logo" className="news-logo" />
+      &lt;/div>
+
+      {/* Page Title */}
+      &lt;h1 className="news-title">Latest News&lt;/h1>
+
+      {/* Scrollable news card container */}
+      &lt;div className="news-card-wrapper">
+        &lt;div className="news-cards-container">
+          {currentArticles.map((article, index) => (
+            &lt;div key={index} className="news-card" onClick={() => handleCardClick(article)}>
+              {article.imageURL &amp;&amp; (
+                &lt;img
+                  src={article.imageURL}
+                  alt={article.title}
+                  className="news-card-image"
+                />
+              )}
+              &lt;div className="news-card-content">
+                &lt;h3 className="news-card-title">{article.title}&lt;/h3>
+                &lt;p className="news-card-preview">
+                  {article.content.slice(0, 500)}...
+                &lt;/p>
+              &lt;/div>
+            &lt;/div>
+          ))}
+        &lt;/div>
+      &lt;/div>
+
+      {/* Pagination */}
+      &lt;div className="pagination">
+        {currentPage > 1 &amp;&amp; (
+          &lt;button className="page-button" onClick={() => handlePageChange(currentPage - 1)}>
+            Prev
+          &lt;/button>
+        )}
+
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter((pageNum) =>
+            pageNum === 1 ||
+            pageNum === totalPages ||
+            (pageNum >= currentPage - 1 &amp;&amp; pageNum &lt;= currentPage + 2)
+          )
+          .map((pageNum) => (
+            &lt;button
+              key={pageNum}
+              className="page-button"
+              onClick={() => handlePageChange(pageNum)}
+              disabled={pageNum === currentPage}
+            >
+              Page {pageNum}
+            &lt;/button>
+          ))}
+
+        {currentPage &lt; totalPages &amp;&amp; (
+          &lt;button className="page-button" onClick={() => handlePageChange(currentPage + 1)}>
+            Next
+          &lt;/button>
+        )}
+      &lt;/div>
+
+      {/* Article overlay */}
+      {selectedArticle &amp;&amp; (
+        &lt;div className="news-overlay">
+          &lt;div className="news-overlay-content">
+            &lt;button className="news-overlay-close" onClick={handleCloseOverlay}>×&lt;/button>
+            &lt;h2>{selectedArticle.title}&lt;/h2>
+            &lt;p className="news-overlay-meta">
+              By {selectedArticle.author} |{" "}
+              {new Date(selectedArticle.postedAt).toLocaleDateString()}
+            &lt;/p>
+            {selectedArticle.imageURL &amp;&amp; (
+              &lt;img
+                src={selectedArticle.imageURL}
+                alt={selectedArticle.title}
+                className="news-overlay-image"
+              />
+            )}
+            &lt;p className="news-overlay-text">{selectedArticle.content}&lt;/p>
+          &lt;/div>
+        &lt;/div>
+      )}
+    &lt;/div>
+  );
+};
+
+export default News;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#App">App</a></li><li><a href="global.html#Category">Category</a></li><li><a href="global.html#Chat">Chat</a></li><li><a href="global.html#CommunityEventForm">CommunityEventForm</a></li><li><a href="global.html#CommunityEventPage">CommunityEventPage</a></li><li><a href="global.html#ContactForm">ContactForm</a></li><li><a href="global.html#ForumCategory">ForumCategory</a></li><li><a href="global.html#ForumLanding">ForumLanding</a></li><li><a href="global.html#ForumThread">ForumThread</a></li><li><a href="global.html#Login">Login</a></li><li><a href="global.html#Logout">Logout</a></li><li><a href="global.html#News">News</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#approveEvent">approveEvent</a></li><li><a href="global.html#auth">auth</a></li><li><a href="global.html#author">author</a></li><li><a href="global.html#container">container</a></li><li><a href="global.html#containsBannedWord">containsBannedWord</a></li><li><a href="global.html#content">content</a></li><li><a href="global.html#contents">contents</a></li><li><a href="global.html#createEvent">createEvent</a></li><li><a href="global.html#createNewsPost">createNewsPost</a></li><li><a href="global.html#createReply">createReply</a></li><li><a href="global.html#createdAt">createdAt</a></li><li><a href="global.html#date">date</a></li><li><a href="global.html#deleteAllPosts">deleteAllPosts</a></li><li><a href="global.html#deleteEvent">deleteEvent</a></li><li><a href="global.html#deleteNewsPost">deleteNewsPost</a></li><li><a href="global.html#deletePostById">deletePostById</a></li><li><a href="global.html#description">description</a></li><li><a href="global.html#displayName">displayName</a></li><li><a href="global.html#email">email</a></li><li><a href="global.html#emailVerified">emailVerified</a></li><li><a href="global.html#express">express</a></li><li><a href="global.html#filterApprovedEvents">filterApprovedEvents</a></li><li><a href="global.html#firebaseConfig">firebaseConfig</a></li><li><a href="global.html#fs">fs</a></li><li><a href="global.html#getAllCategories">getAllCategories</a></li><li><a href="global.html#getAllEvents">getAllEvents</a></li><li><a href="global.html#getAllNewsPosts">getAllNewsPosts</a></li><li><a href="global.html#getAllPosts">getAllPosts</a></li><li><a href="global.html#getEventById">getEventById</a></li><li><a href="global.html#getNewsPostById">getNewsPostById</a></li><li><a href="global.html#getPostsByCategory">getPostsByCategory</a></li><li><a href="global.html#getPostsById">getPostsById</a></li><li><a href="global.html#googleProvider">googleProvider</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#imageURL">imageURL</a></li><li><a href="global.html#isApproved">isApproved</a></li><li><a href="global.html#isEdited">isEdited</a></li><li><a href="global.html#isPinned">isPinned</a></li><li><a href="global.html#location">location</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#newsPostSchema">newsPostSchema</a></li><li><a href="global.html#photo">photo</a></li><li><a href="global.html#photoURL">photoURL</a></li><li><a href="global.html#postSchema">postSchema</a></li><li><a href="global.html#postedAt">postedAt</a></li><li><a href="global.html#providerId">providerId</a></li><li><a href="global.html#replies">replies</a></li><li><a href="global.html#replyCharacterLimit">replyCharacterLimit</a></li><li><a href="global.html#replyCharacterMin">replyCharacterMin</a></li><li><a href="global.html#replySchema">replySchema</a></li><li><a href="global.html#saveUser">saveUser</a></li><li><a href="global.html#shareToSocial">shareToSocial</a></li><li><a href="global.html#sortEventsAsc">sortEventsAsc</a></li><li><a href="global.html#sortEventsDesc">sortEventsDesc</a></li><li><a href="global.html#tags">tags</a></li><li><a href="global.html#thisSchema">thisSchema</a></li><li><a href="global.html#title">title</a></li><li><a href="global.html#uid">uid</a></li><li><a href="global.html#updateEvent">updateEvent</a></li><li><a href="global.html#updateForumPost">updateForumPost</a></li><li><a href="global.html#updateNewsPost">updateNewsPost</a></li><li><a href="global.html#updateReply">updateReply</a></li><li><a href="global.html#updatedAt">updatedAt</a></li><li><a href="global.html#userName">userName</a></li><li><a href="global.html#userPosted">userPosted</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat Apr 12 2025 14:41:37 GMT-0400 (Eastern Daylight Saving Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

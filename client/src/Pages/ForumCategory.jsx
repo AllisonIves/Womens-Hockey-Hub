@@ -12,6 +12,14 @@ import replyCharacterMin from "/src/utilities/replyCharacterMin";
 // Register the locale data
 TimeAgo.addDefaultLocale(en);
 
+/**
+ * ForumCategory component displays a list of forum threads within a specific category.
+ * Threads can be sorted, paginated, and new threads can be created by authenticated users.
+ *
+ * @component
+ * @returns {JSX.Element} Rendered forum category page with post list and create post form.
+ */
+
 const ForumCategory = () => {
   const { category } = useParams();
   const navigate = useNavigate();
@@ -24,6 +32,7 @@ const ForumCategory = () => {
   const itemsPerPage = 25;
   const [displayName, setDisplayName] = useState("");
 
+  // Fetch posts and sort by pinned/recent reply when category changes
   useEffect(() => {
     setDisplayName(sessionStorage.getItem("displayName"));
 
@@ -60,7 +69,9 @@ const ForumCategory = () => {
     fetchPosts();
   }, [category]);
 
-  
+    /**
+   * Handles thread submission, including validation and server call.
+   */
   const handleSubmitPost = async () => {
     setErrorMessage("");
   
@@ -106,12 +117,20 @@ const ForumCategory = () => {
     }
   };
 
+  /**
+   * Shows the post creation form when user clicks "Start a Thread".
+   */
   const handleStartThreadClick = () => {
     setShowPostForm(true); //Show the post form when the buttn is clicked
   };
 
+  /**
+   * Sets the current pagination page.
+   * @param {number} pageNumber - Page number to navigate to.
+   */
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
+  // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = posts.slice(indexOfFirstItem, indexOfLastItem);

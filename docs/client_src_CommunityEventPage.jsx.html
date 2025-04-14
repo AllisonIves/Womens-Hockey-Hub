@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: client/src/CommunityEventPage.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: client/src/CommunityEventPage.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { sortEventsAsc, sortEventsDesc } from "./utilities/sortEvents"; 
+import filterApprovedEvents from "./utilities/filterApprovedEvents";
+import shareToSocial from "./utilities/shareToSocial";
+import "/src/styles/CommunityEventPage.css";
+
+/**
+ * CommunityEventPage component displays a list of approved community-submitted events.
+ * Users can sort events by date, and share individual events on social media platforms.
+ *
+ * @component
+ * @returns {JSX.Element} Rendered community event board with sorting and sharing options.
+ */
+const CommunityEventPage = () => {
+  const [events, setEvents] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [openDropdown, setOpenDropdown] = useState(null); //Track if dropdown is open
+  
+    /**
+   * Toggles the visibility of the share dropdown for a specific event.
+   * @param {string} eventId - The ID of the event being toggled.
+   */
+  const toggleDropdown = (eventId) => {
+    if (openDropdown === eventId) {
+      setOpenDropdown(null); //Close if clicked again
+    } else {
+      setOpenDropdown(eventId); //Open dropdown for the event
+    }
+  };
+
+    /**
+   * Fetches community events from the backend and filters to only approved events.
+   */
+  useEffect(() => {
+    const fetchEvents = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/api/communityevent");
+            const approvedEvents = filterApprovedEvents(response.data);
+            setEvents(approvedEvents);
+        } catch (err) {
+            console.error("Error fetching events:", err);
+            setError("Failed to load events. Please try again later.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchEvents();
+  }, []);
+
+  return (
+    &lt;div className="events-container">
+      &lt;h1 className="events-title">Community Events&lt;/h1>
+
+      {/* Sorting Buttons */}
+      &lt;div className="sorting-buttons">
+        &lt;button onClick={() => setEvents(sortEventsAsc(events))} className="sort-button">
+          Sort Ascending
+        &lt;/button>
+        &lt;button onClick={() => setEvents(sortEventsDesc(events))} className="sort-button">
+          Sort Descending
+        &lt;/button>
+      &lt;/div>
+
+      {error &amp;&amp; &lt;p className="error-message">{error}&lt;/p>}
+      {loading ? (
+        &lt;p className="loading-message">Loading events...&lt;/p>
+      ) : (
+        &lt;div className="event-list-container">
+          &lt;ul className="event-list">
+            {events.map((event) => (
+              &lt;li key={event._id} className="event-card">
+                {event.photo &amp;&amp; (
+                  &lt;img
+                    src={`http://localhost:5000${event.photo}`}
+                    alt={event.name}
+                    className="event-image"
+                  />
+                )}
+                &lt;h2 className="event-name">{event.name}&lt;/h2>
+                &lt;p className="event-description">{event.description}&lt;/p>
+                &lt;p className="event-details">&lt;strong>Date:&lt;/strong> {new Date(event.date).toDateString()}&lt;/p>
+                &lt;p className="event-details">&lt;strong>Location:&lt;/strong> {event.location}&lt;/p>
+                
+                 {/* Share Button */}
+                &lt;button
+                  onClick={() => toggleDropdown(event._id)}
+                  className="share-button"
+                >
+                Share
+                &lt;/button>
+                
+            {/* Dropdown menu */}
+            {openDropdown === event._id &amp;&amp; (
+              &lt;div className="dropdown-menu">
+                {/* Social Share Buttons*/}
+                &lt;button onClick={() => shareToSocial('x', event.name, window.location.href)}>Share on X&lt;/button>
+                &lt;button onClick={() => shareToSocial('facebook', event.name, window.location.href)}>Share on Facebook&lt;/button>
+                &lt;button onClick={() => shareToSocial('reddit', event.name, window.location.href)}>Share on Reddit&lt;/button>
+              &lt;/div>
+            )}
+            &lt;/li>
+               
+            ))}
+          &lt;/ul>
+        &lt;/div>
+      )}
+    &lt;/div>
+  );
+};
+export default CommunityEventPage;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#App">App</a></li><li><a href="global.html#Category">Category</a></li><li><a href="global.html#Chat">Chat</a></li><li><a href="global.html#CommunityEventForm">CommunityEventForm</a></li><li><a href="global.html#CommunityEventPage">CommunityEventPage</a></li><li><a href="global.html#ContactForm">ContactForm</a></li><li><a href="global.html#ForumCategory">ForumCategory</a></li><li><a href="global.html#ForumLanding">ForumLanding</a></li><li><a href="global.html#ForumThread">ForumThread</a></li><li><a href="global.html#Login">Login</a></li><li><a href="global.html#Logout">Logout</a></li><li><a href="global.html#News">News</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#approveEvent">approveEvent</a></li><li><a href="global.html#auth">auth</a></li><li><a href="global.html#author">author</a></li><li><a href="global.html#container">container</a></li><li><a href="global.html#containsBannedWord">containsBannedWord</a></li><li><a href="global.html#content">content</a></li><li><a href="global.html#contents">contents</a></li><li><a href="global.html#createEvent">createEvent</a></li><li><a href="global.html#createNewsPost">createNewsPost</a></li><li><a href="global.html#createReply">createReply</a></li><li><a href="global.html#createdAt">createdAt</a></li><li><a href="global.html#date">date</a></li><li><a href="global.html#deleteAllPosts">deleteAllPosts</a></li><li><a href="global.html#deleteEvent">deleteEvent</a></li><li><a href="global.html#deleteNewsPost">deleteNewsPost</a></li><li><a href="global.html#deletePostById">deletePostById</a></li><li><a href="global.html#description">description</a></li><li><a href="global.html#displayName">displayName</a></li><li><a href="global.html#email">email</a></li><li><a href="global.html#emailVerified">emailVerified</a></li><li><a href="global.html#express">express</a></li><li><a href="global.html#filterApprovedEvents">filterApprovedEvents</a></li><li><a href="global.html#firebaseConfig">firebaseConfig</a></li><li><a href="global.html#fs">fs</a></li><li><a href="global.html#getAllCategories">getAllCategories</a></li><li><a href="global.html#getAllEvents">getAllEvents</a></li><li><a href="global.html#getAllNewsPosts">getAllNewsPosts</a></li><li><a href="global.html#getAllPosts">getAllPosts</a></li><li><a href="global.html#getEventById">getEventById</a></li><li><a href="global.html#getNewsPostById">getNewsPostById</a></li><li><a href="global.html#getPostsByCategory">getPostsByCategory</a></li><li><a href="global.html#getPostsById">getPostsById</a></li><li><a href="global.html#googleProvider">googleProvider</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#imageURL">imageURL</a></li><li><a href="global.html#isApproved">isApproved</a></li><li><a href="global.html#isEdited">isEdited</a></li><li><a href="global.html#isPinned">isPinned</a></li><li><a href="global.html#location">location</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#newsPostSchema">newsPostSchema</a></li><li><a href="global.html#photo">photo</a></li><li><a href="global.html#photoURL">photoURL</a></li><li><a href="global.html#postSchema">postSchema</a></li><li><a href="global.html#postedAt">postedAt</a></li><li><a href="global.html#providerId">providerId</a></li><li><a href="global.html#replies">replies</a></li><li><a href="global.html#replyCharacterLimit">replyCharacterLimit</a></li><li><a href="global.html#replyCharacterMin">replyCharacterMin</a></li><li><a href="global.html#replySchema">replySchema</a></li><li><a href="global.html#saveUser">saveUser</a></li><li><a href="global.html#shareToSocial">shareToSocial</a></li><li><a href="global.html#sortEventsAsc">sortEventsAsc</a></li><li><a href="global.html#sortEventsDesc">sortEventsDesc</a></li><li><a href="global.html#tags">tags</a></li><li><a href="global.html#thisSchema">thisSchema</a></li><li><a href="global.html#title">title</a></li><li><a href="global.html#uid">uid</a></li><li><a href="global.html#updateEvent">updateEvent</a></li><li><a href="global.html#updateForumPost">updateForumPost</a></li><li><a href="global.html#updateNewsPost">updateNewsPost</a></li><li><a href="global.html#updateReply">updateReply</a></li><li><a href="global.html#updatedAt">updatedAt</a></li><li><a href="global.html#userName">userName</a></li><li><a href="global.html#userPosted">userPosted</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat Apr 12 2025 14:41:37 GMT-0400 (Eastern Daylight Saving Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

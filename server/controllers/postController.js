@@ -1,9 +1,18 @@
+/**
+ * @file Controller for handling forum post and reply operations.
+ * Includes logic for creating, reading, updating, and deleting posts and replies,
+ * along with banned word checks and category filtering.
+ */
+
 const Post = require('../models/post');
 const containsBannedWord = require('../utilities/checkBannedWords');
 
 // REST API
 
-// GET /api/post
+/**
+ * Get all forum posts.
+ * @route GET /api/post
+ */
 exports.getAllPosts = async (req, res) => {
   try {
     const posts = await Post.find();
@@ -13,6 +22,10 @@ exports.getAllPosts = async (req, res) => {
   }
 };
 
+/**
+ * Get a single post by UUID.
+ * @route GET /api/post/id/:postId
+ */
 exports.getPostsById = async (req, res) => {
   try {
     const { postId } = req.params;
@@ -28,7 +41,10 @@ exports.getPostsById = async (req, res) => {
   }
 };
 
-// GET /api/post/category/:category
+/**
+ * Get all posts within a specific category.
+ * @route GET /api/post/category/:category
+ */
 exports.getPostsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
@@ -89,7 +105,12 @@ exports.createForumPost = [
   }
 ];
 
-// UPDATE forum post
+/**
+ * Update the contents of a forum post.
+ * @route PUT /api/post/id/:postId
+ * @bodyParam {string} [contents]
+ * @bodyParam {boolean} [isEdited]
+ */
 exports.updateForumPost = [
   body('contents').optional().isString().withMessage('Contents must be a string'),
   body('isEdited').optional().isBoolean().withMessage('isEdited must be a boolean'),
@@ -128,7 +149,12 @@ exports.updateForumPost = [
   }
 ];
 
-// CREATE reply
+/**
+ * Create a reply to a forum post.
+ * @route POST /api/post/:postId/reply
+ * @bodyParam {string} userName
+ * @bodyParam {string} contents
+ */
 exports.createReply = [
   body('contents').isString().notEmpty().withMessage('Reply cannot be empty'),
 
@@ -168,7 +194,11 @@ exports.createReply = [
   }
 ];
 
-// UPDATE reply
+/**
+ * Update a reply on a post.
+ * @route PUT /api/post/id/:postId/reply/:replyId
+ * @bodyParam {string} [contents]
+ */
 exports.updateReply = [
   body('contents').optional().isString().withMessage('Reply content must be a string'),
 
@@ -210,7 +240,11 @@ exports.updateReply = [
   }
 ];
 
-// DELETE /api/forum/id/:id
+
+/**
+ * Delete a single forum post by UUID.
+ * @route DELETE /api/forum/id/:id
+ */
 exports.deletePostById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -226,7 +260,10 @@ exports.deletePostById = async (req, res) => {
   }
 };
 
-// DELETE ALL /api/forum
+/**
+ * Delete all forum posts.
+ * @route DELETE /api/forum
+ */
 exports.deleteAllPosts = async (req, res) => {
   try {
     const result = await Post.deleteMany({});
@@ -236,7 +273,10 @@ exports.deleteAllPosts = async (req, res) => {
   }
 };
 
-// GET /api/forum/categories
+/**
+ * Get all unique forum post categories.
+ * @route GET /api/forum/categories
+ */
 exports.getAllCategories = async (req, res) => {
   try {
     const posts = await Post.find().select("Category -_id");
