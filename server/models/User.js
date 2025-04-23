@@ -26,7 +26,10 @@ const userSchema = new mongoose.Schema({
   emailVerified: { type: Boolean, default: false },
   
   /** The provider used to authenticate the user (will always be google) */
-  providerId: { type: String }
+  providerId: { type: String },
+
+  /** Whether user is Admin role */
+  isAdmin: {type: Boolean, default: false}
 }, 
 /** Automatically add createdAt and updatedAt timestamps */
 { timestamps: true });

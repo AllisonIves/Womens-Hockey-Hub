@@ -16,9 +16,10 @@ const User = require("../models/User");
  * @bodyParam {string} photoURL - Profile image URL
  * @bodyParam {boolean} emailVerified - Whether the user verified their email
  * @bodyParam {string} providerId - The Firebase provider (e.g., google.com)
+ * @bodyParam {boolean} isAdmin - Whether user is an Admin role
  */
 const saveUser = async (req, res) => {
-  const { uid, displayName, email, photoURL, emailVerified, providerId } = req.body;
+  const { uid, displayName, email, photoURL, emailVerified, providerId, isAdmin } = req.body;
 
   if (!uid || !email) {
     return res.status(400).json({ message: "UID and email are required." });
@@ -28,7 +29,7 @@ const saveUser = async (req, res) => {
     let user = await User.findOne({ uid });s
 
     if (!user) {
-      user = new User({ uid, displayName, email, photoURL, emailVerified, providerId });
+      user = new User({ uid, displayName, email, photoURL, emailVerified, providerId, isAdmin });
       await user.save();
       return res.status(201).json({ message: "User created", user });
     } else {

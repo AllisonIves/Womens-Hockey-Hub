@@ -40,6 +40,7 @@ const Login = () => {
           photoURL: user.photoURL,
           emailVerified: user.emailVerified,
           providerId: user.providerData[0]?.providerId || "google",
+          isAdmin: false
         }),
       });
 

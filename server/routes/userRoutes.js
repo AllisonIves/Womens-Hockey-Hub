@@ -20,7 +20,7 @@ const User = require('../models/User');
  */
 router.post('/', async (req, res) => {
   try {
-    const { uid, displayName, email, photoURL, emailVerified, providerId } = req.body;
+    const { uid, displayName, email, photoURL, emailVerified, providerId, isAdmin } = req.body;
 
     let user = await User.findOne({ uid });
 
@@ -30,11 +30,12 @@ router.post('/', async (req, res) => {
       user.photoURL = photoURL;
       user.emailVerified = emailVerified;
       user.providerId = providerId;
+      user.isAdmin = isAdmin;
       await user.save();
       return res.status(200).json({ message: 'User updated', user });
     }
 
-    user = new User({ uid, displayName, email, photoURL, emailVerified, providerId });
+    user = new User({ uid, displayName, email, photoURL, emailVerified, providerId, isAdmin });
     await user.save();
     res.status(201).json({ message: 'User created', user });
   } catch (err) {
@@ -126,6 +127,31 @@ router.post("/logout", async (req, res) => {
     res.status(200).json({ message: "User deleted successfully." });
   } catch (err) {
     res.status(500).json({ message: "Error deleting user.", error: err.message });
+  }
+});
+router.put("/:userName", async (req, res) => {
+  try {
+    const { userName } = req.params;
+    const { isAdmin } = req.body; //Get isAdmin from request body
+
+    //Query the db and find a user by displayName
+    const user = await User.findOne({ displayName: userName });
+
+    //If no user is found, return a 404 error
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    //update the user's isAdmin field if provided
+    if (typeof isAdmin !== 'undefined') {
+      user.isAdmin = isAdmin;
+    }
+
+    const updatedUser = await user.save(); //Save updated user
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ error: "Failed to update user" });
   }
 });
 
