@@ -1,5 +1,22 @@
+/**
+ * @file Controller for saving or retrieving Firebase-authenticated users.
+ * Used during Google Sign-In to sync user information with MongoDB.
+ */
+
 const User = require("../models/User");
 
+/**
+ * Save a new user or return existing user if already saved.
+ * This is used after Firebase login to store user info in MongoDB.
+ *
+ * @route POST /api/users
+ * @bodyParam {string} uid - Firebase UID (required)
+ * @bodyParam {string} email - User's email (required)
+ * @bodyParam {string} displayName - Firebase display name
+ * @bodyParam {string} photoURL - Profile image URL
+ * @bodyParam {boolean} emailVerified - Whether the user verified their email
+ * @bodyParam {string} providerId - The Firebase provider (e.g., google.com)
+ */
 const saveUser = async (req, res) => {
   const { uid, displayName, email, photoURL, emailVerified, providerId } = req.body;
 

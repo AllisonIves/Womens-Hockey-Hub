@@ -1,8 +1,23 @@
+/**
+ * Routes for managing authenticated users from Firebase.
+ * 
+ * Handles:
+ * - Creating or updating user records after login
+ * - Logging out users (sets emailVerified to false)
+ * - Fetching all users or individual user profiles
+ * - Deleting users (for testing/debugging purposes)
+ * 
+ * Connected model: ../models/User.js
+ */
+
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 
-// POST: Save or update a user
+/**
+ * @route POST /api/users
+ * @desc Create or update a user record based on Firebase UID
+ */
 router.post('/', async (req, res) => {
   try {
     const { uid, displayName, email, photoURL, emailVerified, providerId } = req.body;
@@ -28,7 +43,10 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET: Return all users
+/**
+ * @route GET /api/users
+ * @desc Get all registered users (sorted by creation date descending)
+ */
 router.get('/', async (req, res) => {
   try {
     const users = await User.find().sort({ createdAt: -1 });
@@ -39,7 +57,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST: Logout a user
+/**
+ * @route POST /api/users/logout
+ * @desc Log out a user by setting emailVerified to false
+ */
 router.post("/logout", async (req, res) => {
     try {
       const { uid } = req.body;
@@ -65,6 +86,10 @@ router.post("/logout", async (req, res) => {
     }
   });
 
+    /**
+   * @route GET /api/users/:userName
+   * @desc Get a user's profile by displayName
+   */
   router.get("/:userName", async (req, res) => {
     try {
       const { userName } = req.params;
@@ -85,8 +110,10 @@ router.post("/logout", async (req, res) => {
     }
   });
 
-  // DELETE /api/users/:username
-  //Used for testing and debugging
+    /**
+   * @route DELETE /api/users/:displayName
+   * @desc Delete a user by displayName (for testing/debugging only)
+   */
   router.delete("/:displayName",  async (req, res) => {
   try {
     const { displayName } = req.params;

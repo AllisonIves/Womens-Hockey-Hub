@@ -1,3 +1,14 @@
+/**
+ * Routes for managing news articles displayed on the homepage.
+ *
+ * Handles:
+ * - Creating news posts
+ * - Fetching all news posts or a specific one by ID
+ * - Updating and deleting news posts
+ *
+ * Connected controller: ../controllers/newsController.js
+ */
+
 const express = require("express");
 const router = express.Router();
 const {
@@ -8,19 +19,34 @@ const {
   deleteNewsPost,
 } = require("../controllers/newsController");
 
-// POST /api/news - Create a new news post
+/**
+ * @route POST /api/news
+ * @desc Create a new news post
+ */
 router.post("/", createNewsPost);
 
-// GET /api/news - Get all news posts
+/**
+ * @route GET /api/news
+ * @desc Get all news posts (sorted by newest first)
+ */
 router.get("/", getAllNewsPosts);
 
-// GET /api/news/:id - Get a single news post by ID
+/**
+ * @route GET /api/news/:id
+ * @desc Get a single news post by its MongoDB _id
+ */
 router.get("/:id", getNewsPostById);
 
-// PUT /api/news/:id - Update a news post by ID
+/**
+ * @route PUT /api/news/:id
+ * @desc Update a news post by its ID
+ */
 router.put("/:id", updateNewsPost);
 
-// DELETE /api/news/:id - Delete a news post by ID
+/**
+ * @route DELETE /api/news/:id
+ * @desc Delete a news post by its ID
+ */
 router.delete("/:id", deleteNewsPost);
 
 module.exports = router;

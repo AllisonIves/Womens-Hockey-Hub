@@ -1,6 +1,15 @@
+/**
+ * @file Controller for handling community event operations.
+ * Provides endpoints to fetch, create, update, delete, and approve community-submitted events.
+ */
+
 const Communityevent = require('../models/communityevent');
 
-// Get All Events
+/**
+ * Fetches all community events from the database.
+ * @route GET /api/communityevent
+ * @access Public
+ */
 exports.getAllEvents = async (req, res) => {
     try {
         console.log("Fetching all events...");
@@ -12,7 +21,11 @@ exports.getAllEvents = async (req, res) => {
     }
 };
 
-// Get Event by ID
+/**
+ * Fetches a single community event by ID.
+ * @route GET /api/communityevent/:id
+ * @access Public
+ */
 exports.getEventById = async (req, res) => {
     try {
         console.log(`Fetching event with ID: ${req.params.id}`);
@@ -27,7 +40,13 @@ exports.getEventById = async (req, res) => {
     }
 };
 
-// Create Event
+
+/**
+ * Creates a new community event.
+ * Validates required fields and checks for pending unapproved submissions by the same user.
+ * @route POST /api/communityevent
+ * @access Public (pending approval)
+ */
 exports.createEvent = async (req, res) => {
     try {
         console.log("Received request to create event");
@@ -72,7 +91,11 @@ exports.createEvent = async (req, res) => {
     }
 };
 
-// Delete Event
+/**
+ * Deletes an event by ID.
+ * @route DELETE /api/communityevent/:id
+ * @access Admin
+ */
 exports.deleteEvent = async (req, res) => {
     try {
         console.log(`Deleting event with ID: ${req.params.id}`);
@@ -88,7 +111,12 @@ exports.deleteEvent = async (req, res) => {
     }
 };
 
-// Approve Event
+/**
+ * Approves a pending event submission by ID.
+ * Sets `isApproved` to true.
+ * @route PUT /api/communityevent/approve/:id
+ * @access Admin
+ */
 exports.approveEvent = async (req, res) => {
     try {
         console.log(`Approving event with ID: ${req.params.id}`);
@@ -107,7 +135,11 @@ exports.approveEvent = async (req, res) => {
     }
 };
 
-// Update Event (Supports Image Updates)
+/**
+ * Updates a community event by ID. Supports partial updates and image uploads.
+ * @route PUT /api/communityevent/:id
+ * @access Admin
+ */
 exports.updateEvent = async (req, res) => {
     try {
         console.log(`Updating event with ID: ${req.params.id}`);

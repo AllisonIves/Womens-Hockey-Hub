@@ -5,14 +5,23 @@ import filterApprovedEvents from "./utilities/filterApprovedEvents";
 import shareToSocial from "./utilities/shareToSocial";
 import "/src/styles/CommunityEventPage.css";
 
+/**
+ * CommunityEventPage component displays a list of approved community-submitted events.
+ * Users can sort events by date, and share individual events on social media platforms.
+ *
+ * @component
+ * @returns {JSX.Element} Rendered community event board with sorting and sharing options.
+ */
 const CommunityEventPage = () => {
   const [events, setEvents] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-
-
   const [openDropdown, setOpenDropdown] = useState(null); //Track if dropdown is open
   
+    /**
+   * Toggles the visibility of the share dropdown for a specific event.
+   * @param {string} eventId - The ID of the event being toggled.
+   */
   const toggleDropdown = (eventId) => {
     if (openDropdown === eventId) {
       setOpenDropdown(null); //Close if clicked again
@@ -21,6 +30,9 @@ const CommunityEventPage = () => {
     }
   };
 
+    /**
+   * Fetches community events from the backend and filters to only approved events.
+   */
   useEffect(() => {
     const fetchEvents = async () => {
         try {

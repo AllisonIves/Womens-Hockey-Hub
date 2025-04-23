@@ -1,7 +1,10 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-// Firebase config
+/**
+ * Firebase configuration object using Vite environment variables.
+ * These values are injected at build time.
+ */
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -12,11 +15,22 @@ const firebaseConfig = {
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
   };
 
-// Initialize Firebase
+/**
+ * Initializes Firebase app with the provided config.
+ * Required before any Firebase services can be used.
+ */
 const app = initializeApp(firebaseConfig);
 
-// Initialize Auth and Google Provider
+/**
+ * Firebase Authentication instance.
+ * Used for managing user login sessions across the app.
+ */
 const auth = getAuth(app);
+
+/**
+ * GoogleAuthProvider instance.
+ * Used to enable Google Sign-In via Firebase.
+ */
 const googleProvider = new GoogleAuthProvider();
 
 export { auth, googleProvider };

@@ -4,6 +4,14 @@ import "/src/styles/CommunityEventForm.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+/**
+ * CommunityEventForm component allows users to submit events.
+ * The form accepts text inputs and an optional image, and sends data to the backend using multipart/form-data.
+ * Displays a success popup on submission and handles basic validation/errors.
+ *
+ * @component
+ * @returns {JSX.Element} A community event submission form.
+ */
 const CommunityEventForm = () => {
   const [eventData, setEventData] = useState({
     name: "",
@@ -18,6 +26,10 @@ const CommunityEventForm = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+   /**
+   * Handles changes to text fields in the form.
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>} e - Form input change event.
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEventData((prevData) => ({
@@ -26,6 +38,10 @@ const CommunityEventForm = () => {
     }));
   };
 
+    /**
+   * Handles image file selection and generates a preview URL.
+   * @param {React.ChangeEvent<HTMLInputElement>} e - File input change event.
+   */
   const handleFileChange = (e) => {
     const file = e.target.files[0];
 
@@ -39,6 +55,11 @@ const CommunityEventForm = () => {
     }
   };
 
+    /**
+   * Submits the event form to the backend using FormData.
+   * Displays a success popup on success or an error message on failure.
+   * @param {React.FormEvent<HTMLFormElement>} e - Form submission event.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");

@@ -1,6 +1,13 @@
 import React from "react";
 import "/src/styles/contactform.css";
 
+/**
+ * ContactForm component displays a Google Form embedded within the site layout.
+ * Used to allow users to contact the Women's Hockey Hub team directly.
+ *
+ * @component
+ * @returns {JSX.Element} Rendered contact form page with an embedded Google Form.
+ */
 const ContactForm = () => {
   return (
     <div className="contact-form-page">
