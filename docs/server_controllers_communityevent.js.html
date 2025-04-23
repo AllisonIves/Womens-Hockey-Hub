@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: server/controllers/communityevent.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: server/controllers/communityevent.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file Controller for handling community event operations.
+ * Provides endpoints to fetch, create, update, delete, and approve community-submitted events.
+ */
+
+const Communityevent = require('../models/communityevent');
+
+/**
+ * Fetches all community events from the database.
+ * @route GET /api/communityevent
+ * @access Public
+ */
+exports.getAllEvents = async (req, res) => {
+    try {
+        console.log("Fetching all events...");
+        const events = await Communityevent.find();
+        res.json(events);
+    } catch (err) {
+        console.error("Error fetching events:", err.message);
+        res.status(500).json({ message: "Failed to fetch events", error: err.message });
+    }
+};
+
+/**
+ * Fetches a single community event by ID.
+ * @route GET /api/communityevent/:id
+ * @access Public
+ */
+exports.getEventById = async (req, res) => {
+    try {
+        console.log(`Fetching event with ID: ${req.params.id}`);
+        const event = await Communityevent.findById(req.params.id);
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+        res.status(200).json(event);
+    } catch (err) {
+        console.error("Error fetching event by ID:", err.message);
+        res.status(500).json({ message: "Failed to fetch event", error: err.message });
+    }
+};
+
+
+/**
+ * Creates a new community event.
+ * Validates required fields and checks for pending unapproved submissions by the same user.
+ * @route POST /api/communityevent
+ * @access Public (pending approval)
+ */
+exports.createEvent = async (req, res) => {
+    try {
+        console.log("Received request to create event");
+        console.log("Request Body:", req.body);
+        console.log("Uploaded File:", req.file);
+
+        // Validate required fields
+        if (!req.body.name || !req.body.userPosted || !req.body.date || !req.body.location || !req.body.description) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        // Check if user has a pending event
+        const checkquantity = await Communityevent.countDocuments({
+            userPosted: req.body.userPosted,
+            isApproved: false
+        });
+
+        if (checkquantity > 0) {
+            return res.status(400).json({ message: "You already have an event pending approval." });
+        }
+
+        const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+        // Create new event
+        const thisevent = new Communityevent({
+            name: req.body.name,
+            location: req.body.location,
+            date: req.body.date,
+            description: req.body.description,
+            isApproved: false,
+            userPosted: req.body.userPosted,
+            photo: imageUrl
+        });
+
+        const newEvent = await thisevent.save();
+        console.log("Event created successfully:", newEvent);
+        res.status(201).json(newEvent);
+
+    } catch (err) {
+        console.error("Error creating event:", err.message);
+        res.status(500).json({ message: "Internal Server Error", error: err.message });
+    }
+};
+
+/**
+ * Deletes an event by ID.
+ * @route DELETE /api/communityevent/:id
+ * @access Admin
+ */
+exports.deleteEvent = async (req, res) => {
+    try {
+        console.log(`Deleting event with ID: ${req.params.id}`);
+        const event = await Communityevent.findByIdAndDelete(req.params.id);
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+        console.log("Event deleted successfully");
+        res.status(200).json({ message: "Event deleted successfully" });
+    } catch (err) {
+        console.error("Error deleting event:", err.message);
+        res.status(500).json({ message: "Failed to delete event", error: err.message });
+    }
+};
+
+/**
+ * Approves a pending event submission by ID.
+ * Sets `isApproved` to true.
+ * @route PUT /api/communityevent/approve/:id
+ * @access Admin
+ */
+exports.approveEvent = async (req, res) => {
+    try {
+        console.log(`Approving event with ID: ${req.params.id}`);
+        const event = await Communityevent.findById(req.params.id);
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+
+        event.isApproved = true;
+        await event.save();
+        console.log("Event approved successfully");
+        res.status(200).json({ message: "Event approved successfully" });
+    } catch (err) {
+        console.error("Error approving event:", err.message);
+        res.status(500).json({ message: "Failed to approve event", error: err.message });
+    }
+};
+
+/**
+ * Updates a community event by ID. Supports partial updates and image uploads.
+ * @route PUT /api/communityevent/:id
+ * @access Admin
+ */
+exports.updateEvent = async (req, res) => {
+    try {
+        console.log(`Updating event with ID: ${req.params.id}`);
+        console.log("Request Body:", req.body);
+        console.log("Uploaded File:", req.file);
+
+        // Ensure at least one field is provided
+        if (!req.body.name &amp;&amp; !req.body.location &amp;&amp; !req.body.date &amp;&amp; !req.body.description &amp;&amp; !req.body.userPosted &amp;&amp; !req.file) {
+            return res.status(400).json({ message: "No update data provided" });
+        }
+
+        let updateData = { ...req.body };
+
+        // If an image is uploaded, update it
+        if (req.file) {
+            updateData.photo = `/uploads/${req.file.filename}`;
+        }
+
+        const updatedEvent = await Communityevent.findByIdAndUpdate(
+            req.params.id,
+            updateData,
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedEvent) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+
+        console.log("Event updated successfully:", updatedEvent);
+        res.status(200).json(updatedEvent);
+    } catch (error) {
+        console.error("Error updating event:", error.message);
+        res.status(500).json({ message: "Failed to update event", error: error.message });
+    }
+};
+
+// Approve a specific event
+exports.approveEvent = async (req, res) => {
+    try {
+        const event = await Communityevent.findById(req.params.id);
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+
+        event.isApproved = true; // Set isApproved to true
+        await event.save();
+
+        res.status(200).json({ message: "Event approved successfully", event });
+    } catch (err) {
+        res.status(500).json({ message: "Error approving event", error: err.message });
+    }
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#App">App</a></li><li><a href="global.html#Category">Category</a></li><li><a href="global.html#Chat">Chat</a></li><li><a href="global.html#CommunityEventForm">CommunityEventForm</a></li><li><a href="global.html#CommunityEventPage">CommunityEventPage</a></li><li><a href="global.html#ContactForm">ContactForm</a></li><li><a href="global.html#ForumCategory">ForumCategory</a></li><li><a href="global.html#ForumLanding">ForumLanding</a></li><li><a href="global.html#ForumThread">ForumThread</a></li><li><a href="global.html#Login">Login</a></li><li><a href="global.html#Logout">Logout</a></li><li><a href="global.html#News">News</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#approveEvent">approveEvent</a></li><li><a href="global.html#auth">auth</a></li><li><a href="global.html#author">author</a></li><li><a href="global.html#container">container</a></li><li><a href="global.html#containsBannedWord">containsBannedWord</a></li><li><a href="global.html#content">content</a></li><li><a href="global.html#contents">contents</a></li><li><a href="global.html#createEvent">createEvent</a></li><li><a href="global.html#createNewsPost">createNewsPost</a></li><li><a href="global.html#createReply">createReply</a></li><li><a href="global.html#createdAt">createdAt</a></li><li><a href="global.html#date">date</a></li><li><a href="global.html#deleteAllPosts">deleteAllPosts</a></li><li><a href="global.html#deleteEvent">deleteEvent</a></li><li><a href="global.html#deleteNewsPost">deleteNewsPost</a></li><li><a href="global.html#deletePostById">deletePostById</a></li><li><a href="global.html#description">description</a></li><li><a href="global.html#displayName">displayName</a></li><li><a href="global.html#email">email</a></li><li><a href="global.html#emailVerified">emailVerified</a></li><li><a href="global.html#express">express</a></li><li><a href="global.html#filterApprovedEvents">filterApprovedEvents</a></li><li><a href="global.html#firebaseConfig">firebaseConfig</a></li><li><a href="global.html#fs">fs</a></li><li><a href="global.html#getAllCategories">getAllCategories</a></li><li><a href="global.html#getAllEvents">getAllEvents</a></li><li><a href="global.html#getAllNewsPosts">getAllNewsPosts</a></li><li><a href="global.html#getAllPosts">getAllPosts</a></li><li><a href="global.html#getEventById">getEventById</a></li><li><a href="global.html#getNewsPostById">getNewsPostById</a></li><li><a href="global.html#getPostsByCategory">getPostsByCategory</a></li><li><a href="global.html#getPostsById">getPostsById</a></li><li><a href="global.html#googleProvider">googleProvider</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#imageURL">imageURL</a></li><li><a href="global.html#isApproved">isApproved</a></li><li><a href="global.html#isEdited">isEdited</a></li><li><a href="global.html#isPinned">isPinned</a></li><li><a href="global.html#location">location</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#newsPostSchema">newsPostSchema</a></li><li><a href="global.html#photo">photo</a></li><li><a href="global.html#photoURL">photoURL</a></li><li><a href="global.html#postSchema">postSchema</a></li><li><a href="global.html#postedAt">postedAt</a></li><li><a href="global.html#providerId">providerId</a></li><li><a href="global.html#replies">replies</a></li><li><a href="global.html#replyCharacterLimit">replyCharacterLimit</a></li><li><a href="global.html#replyCharacterMin">replyCharacterMin</a></li><li><a href="global.html#replySchema">replySchema</a></li><li><a href="global.html#saveUser">saveUser</a></li><li><a href="global.html#shareToSocial">shareToSocial</a></li><li><a href="global.html#sortEventsAsc">sortEventsAsc</a></li><li><a href="global.html#sortEventsDesc">sortEventsDesc</a></li><li><a href="global.html#tags">tags</a></li><li><a href="global.html#thisSchema">thisSchema</a></li><li><a href="global.html#title">title</a></li><li><a href="global.html#uid">uid</a></li><li><a href="global.html#updateEvent">updateEvent</a></li><li><a href="global.html#updateForumPost">updateForumPost</a></li><li><a href="global.html#updateNewsPost">updateNewsPost</a></li><li><a href="global.html#updateReply">updateReply</a></li><li><a href="global.html#updatedAt">updatedAt</a></li><li><a href="global.html#userName">userName</a></li><li><a href="global.html#userPosted">userPosted</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat Apr 12 2025 14:41:37 GMT-0400 (Eastern Daylight Saving Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

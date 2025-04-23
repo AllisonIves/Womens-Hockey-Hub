@@ -1,0 +1,445 @@
+/* WHH Color Variables */
+:root {
+  --WHH-Blue: #003049;
+  --WHH-Red: #c1121F;
+  --WHH-Light-Blue: #669BBC;
+  --WHH-Gray: #EBEDF0;
+}
+
+/* Overall page styling */
+.news-page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--WHH-Gray);
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Card layout: vertical stacking */
+.news-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Scrollable card container */
+.news-card-wrapper {
+  background-color: white;
+  border: 2px solid var(--WHH-Blue);
+  border-radius: 12px;
+  padding: 1rem;
+  max-height: 70vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 95%;
+  max-width: 800px;
+  margin-bottom: 2rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--WHH-Light-Blue) transparent;
+}
+
+.news-card-content {
+  padding: 1rem 1.25rem;
+}
+
+/* News card container (holds multiple cards) */
+.news-cards-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+/* Individual news card */
+.news-card {
+  display: flex;
+  background-color: white;
+  border: 2px solid var(--WHH-Blue);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  width: 90%;
+  max-width: 750px;
+  min-height: 180px;
+}
+
+.news-card:hover {
+  transform: scale(1.01);
+}
+
+/* News card image */
+.news-card-image {
+  width: 200px;
+  height: 100%;
+  object-fit: cover;
+  border: 2px solid black;
+  border-radius: 8px;
+  margin-right: 10px;
+  box-sizing: border-box;
+}
+
+/* News card content area */
+.news-content {
+  padding: 16px;
+  flex: 1;
+}
+
+.news-title {
+  font-size: 1.5rem;
+  color: var(--WHH-Blue);
+  margin: 0 0 10px;
+}
+
+.news-preview {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.news-meta {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Pagination controls */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.page-button {
+  background-color: var(--WHH-Red);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.page-button:hover {
+  background-color: #a40f1b;
+}
+
+.page-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Article overlay */
+.news-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.news-overlay-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 100%;
+  position: relative;
+  color: black;
+  font-family: Arial, sans-serif;
+}
+
+.news-overlay-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.news-overlay-image {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 2px solid black;
+  border-radius: 8px;
+}
+
+.news-overlay-meta {
+  font-size: 0.9rem;
+  color: gray;
+  margin-bottom: 1rem;
+}
+
+.news-overlay-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+/* Logo styling */
+.news-logo-container {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.news-logo {
+  max-width: 200px;
+  height: auto;
+  border-radius: 12px;
+}
+
+/* Main post height consistent with replies */
+.original-post-wrapper {
+  min-height: auto;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+/* Keep replies from squishing the reply box */
+.reply-form-wrapper {
+  margin-top: 2rem;
+  max-height: none;
+  overflow: visible;
+}
+
+/* Reply textarea styling */
+.reply-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  height: 100px;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-bottom: 1rem;
+}
+
+/* Inside card uses column layout */
+.reply-form-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1rem;
+}
+
+/* Reply form heading */
+.reply-form-title {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  color: var(--WHH-Blue);
+}
+
+/* Replies container */
+.replies-wrapper {
+  background-color: white;
+  border: 2px solid var(--WHH-Blue);
+  border-radius: 12px;
+  padding: 1rem;
+  width: 95%;
+  max-width: 800px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--WHH-Light-Blue) transparent;
+  max-height: 500px;
+}
+
+/* Left-side metadata section in reply card */
+.reply-meta {
+  width: 150px;
+  background-color: var(--WHH-Blue);
+  color: white;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 2px solid white;
+}
+
+/* Stylings for meta data container */
+.meta-container {
+  width: 150px;
+  min-height: 100%;
+  background-color: var(--WHH-Blue);
+  color: white;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* ForumLanding-specific card wrapper and card styles */
+.forum-landing-card-wrapper {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.forum-category-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: white;
+  border: 2px solid var(--WHH-Blue);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  width: 90%;
+  max-width: 750px;
+  min-height: 180px;
+  padding: 1rem;
+  text-align: center;
+  text-decoration: none;
+  color: var(--WHH-Gray);
+}
+
+.forum-category-card h3,
+.forum-category-card p {
+  text-shadow: 1px 1px 2px black;
+}
+
+.forum-category-card:nth-child(4n + 1) {
+  background-color: var(--WHH-Blue);
+  color: white;
+}
+
+.forum-category-card:nth-child(4n + 2) {
+  background-color: var(--WHH-Light-Blue);
+  color: white;
+}
+
+.forum-category-card:nth-child(4n + 3) {
+  background-color: var(--WHH-Red);
+  color: white;
+}
+
+.forum-category-card:nth-child(4n + 4) {
+  background-color: #4B5563;
+  color: white;
+}
+
+/* Navbar Stylings */
+.navbar {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  background-color: var(--WHH-Blue);
+  padding: 1rem 0;
+  border-bottom: 2px solid var(--WHH-Light-Blue);
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  display: inline-block;
+  text-align: center;
+}
+
+.nav-link:hover {
+  background-color: var(--WHH-Light-Blue);
+  transform: scale(1.05);
+}
+
+
+.nav-link.active {
+  background-color: var(--WHH-Red);
+  color: white;
+}
+
+/* Footer Stylings */
+.whh-footer {
+  background-color: var(--WHH-Blue);
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  margin-top: auto;
+  width: 100%;
+  position: relative;
+  z-index: 10;
+}
+
+/* Layout wrapper to push footer to bottom */
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Main content takes up available space */
+.main-content {
+  flex: 1;
+}
+
+/* ForumLanding rules container */
+.rules-card-wrapper {
+  background-color: white;
+  border: 2px solid var(--WHH-Blue);
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 95%;
+  max-width: 800px;
+}
+
+.rules-container {
+  font-size: 1rem;
+  color: var(--WHH-Blue);
+  line-height: 1.6;
+}
+
+/* Edit reply area styling */
+.edit-reply-textarea {
+  min-height: 120px;
+  max-height: 300px;
+  margin: 0.5rem auto;
+  font-size: 1rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  resize: both;
+  box-sizing: border-box;
+  display: block;
+}

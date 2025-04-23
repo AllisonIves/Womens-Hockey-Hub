@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: client/src/Pages/ForumThread.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: client/src/Pages/ForumThread.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import "/src/styles/news.css";
+import replyCharacterLimit from "/src/utilities/replyCharacterLimit";
+import replyCharacterMin from "/src/utilities/replyCharacterMin";
+
+/**
+ * ForumThread component displays a full discussion thread including the original post
+ * and all replies. Users can reply, edit, delete their own posts, and view paginated replies.
+ *
+ * @component
+ * @returns {JSX.Element} Rendered thread view with editable posts and paginated replies.
+ */
+const ForumThread = () => {
+  const { postId } = useParams();
+  const navigate = useNavigate();
+  const [post, setPost] = useState(null);
+  const [users, setUsers] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [replyText, setReplyText] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [editingReplyId, setEditingReplyId] = useState(null);
+  const [editReplyText, setEditReplyText] = useState("");
+  const [editingPost, setEditingPost] = useState(false);
+  const [editPostText, setEditPostText] = useState("");
+  const repliesPerPage = 25;
+
+  // Fetch post by ID
+  useEffect(() => {
+    setDisplayName(sessionStorage.getItem("displayName"));
+    const fetchPost = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/forum/id/${postId}`);
+        setPost(res.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Failed to fetch post:", err);
+        setLoading(false);
+      }
+    };
+    fetchPost();
+  }, [postId]);
+
+  // Submit a new reply
+  const handleSubmitReply = async () => {
+    setErrorMessage("");
+
+    const minResult = replyCharacterMin(replyText);
+    if (!minResult.isValid) return setErrorMessage(minResult.message);
+
+    const result = replyCharacterLimit(replyText);
+    if (!result.isValid) return setErrorMessage(result.message);
+
+    try {
+      const res = await axios.post(`http://localhost:5000/api/forum/${postId}/reply`, {
+        userName: displayName,
+        contents: replyText,
+      });
+      setPost(res.data);
+      setReplyText("");
+    } catch (error) {
+      console.error("Failed to submit reply:", error);
+      if (error.response?.data?.error?.toLowerCase().includes("banned")) {
+        setErrorMessage("Your reply contains banned word(s). Please remove them and try again.");
+      } else {
+        setErrorMessage("Failed to submit reply. Please try again.");
+      }
+    }
+  };
+
+  /**
+   * Soft deletes a reply by updating its content.
+   * @param {string} replyId - ID of the reply to delete
+   */
+  const handleDeleteReply = async (replyId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this reply?");
+    if (!confirmDelete) return;
+
+    try {
+      const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}/${replyId}`, {
+        userName: displayName,
+        contents: "This post has been deleted",
+        isEdited: true,
+      });
+      setPost(res.data);
+    } catch (error) {
+      console.error("Failed to delete message");
+    }
+  };
+
+  /**
+   * Soft deletes the original thread post.
+   * @param {string} postId - ID of the post to delete
+   */
+  const handleDelete = async (postId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this thread?");
+    if (!confirmDelete) return;
+
+    try {
+      const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}`, {
+        userName: displayName,
+        contents: "This post has been deleted",
+        isEdited: true,
+      });
+      setPost(res.data);
+    } catch (error) {
+      console.error("Failed to soft-delete post:", error);
+    }
+  };
+
+  /**
+   * Enables editing mode for a reply.
+   * @param {string} replyId - ID of the reply to edit
+   * @param {string} currentText - Existing reply content
+   */
+  const handleEditClick = (replyId, currentText) => {
+    setEditingReplyId(replyId);
+    setEditReplyText(currentText);
+    setErrorMessage("");
+  };
+
+  // Cancel editing a reply
+  const handleEditCancel = () => {
+    setEditingReplyId(null);
+    setEditReplyText("");
+  };
+
+  /**
+   * Submits the edited reply to the server.
+   * @param {string} replyId - ID of the reply being edited
+   */
+  const handleEditSubmit = async (replyId) => {
+    const minResult = replyCharacterMin(editReplyText);
+    if (!minResult.isValid) return alert(minResult.message);
+    const result = replyCharacterLimit(editReplyText);
+    if (!result.isValid) return alert(result.message);
+
+    try {
+      const res = await axios.put(`http://localhost:5000/api/forum/id/${postId}/${replyId}`, {
+        userName: displayName,
+        contents: editReplyText,
+      });
+      setPost(res.data);
+      setEditingReplyId(null);
+      setEditReplyText("");
+    } catch (error) {
+      console.error("Failed to edit reply:", error);
+      if (error.response?.data?.error?.toLowerCase().includes("banned")) {
+        alert("Your reply contains banned word(s). Please remove them and try again.");
+      } else {
+        alert("Failed to edit reply. Please try again.");
+      }
+    }
+  };
+  
+  /**
+   * Changes the current page number for reply pagination.
+   * @param {number} pageNumber - The new page number
+   */
+  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Fetch user data for post and replies
+  useEffect(() => {
+    if (post) {
+      const fetchUser = async (userName) => {
+        if (users[userName]) return;
+        try {
+          const res = await axios.get(`http://localhost:5000/api/users/${encodeURIComponent(userName)}`);
+          setUsers((prev) => ({ ...prev, [userName]: res.data }));
+        } catch (err) {
+          console.error("Failed to fetch user:", err);
+        }
+      };
+
+      fetchUser(post.userName);
+      post.replies.forEach((reply) => {
+        if (!users[reply.userName]) fetchUser(reply.userName);
+      });
+    }
+  }, [post, users]);
+
+    /**
+   * Formats a UTC date string into a readable format.
+   * @param {string} dateString - The ISO date string
+   * @returns {string} A formatted date string
+   */
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })} at ${date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })}`;
+  };
+
+  // Conditional loading states
+  if (loading) return &lt;div className="news-page">&lt;p>Loading thread...&lt;/p>&lt;/div>;
+  if (!post) return &lt;div className="news-page">&lt;p>Thread not found.&lt;/p>&lt;/div>;
+
+  // Pagination logic
+  const indexOfLastReply = currentPage * repliesPerPage;
+  const indexOfFirstReply = indexOfLastReply - repliesPerPage;
+  const currentReplies = post.replies.slice(indexOfFirstReply, indexOfLastReply);
+  const totalPages = Math.ceil(post.replies.length / repliesPerPage);
+
+  // Component render
+  return (
+    &lt;div className="news-page">
+      &lt;h1 className="news-title">Thread View&lt;/h1>
+
+      &lt;div className="news-card-wrapper original-post-wrapper">
+        &lt;div className="news-cards-container">
+          &lt;div className="news-card">
+            &lt;div className="meta-container" style={{ color: "white", padding: "1rem" }}>
+              &lt;p>{post.userName}&lt;/p>
+              {users[post.userName]?.photoURL &amp;&amp; (
+                &lt;img src={users[post.userName].photoURL} alt={`${post.userName}'s profile`} width={100} height={100} />
+              )}
+              &lt;hr />
+              &lt;p>{formatDate(post.createdAt)}&lt;/p>
+            &lt;/div>
+            &lt;div className="news-card-content">
+              {editingPost ? (
+                &lt;>
+                  &lt;textarea
+                    className="reply-textarea edit-reply-textarea"
+                    value={editPostText}
+                    onChange={(e) => setEditPostText(e.target.value)}
+                  />
+                  &lt;div className="edit-delete-container">
+                    &lt;button className="edit-button" onClick={async () => {
+                      const min = replyCharacterMin(editPostText);
+                      if (!min.isValid) return alert(min.message);
+                      const max = replyCharacterLimit(editPostText);
+                      if (!max.isValid) return alert(max.message);
+
+                      try {
+                        const res = await axios.put(`http://localhost:5000/api/forum/id/${post.id}`, {
+                          userName: displayName,
+                          contents: editPostText,
+                          isEdited: true,
+                        });
+                        setPost(res.data);
+                        setEditingPost(false);
+                        setEditPostText("");
+                      } catch (error) {
+                        console.error("Failed to update post:", error);
+                        if (error.response?.data?.error?.toLowerCase().includes("banned")) {
+                          alert("Your post contains banned word(s). Please remove them and try again.");
+                        } else {
+                          alert("Failed to update post. Please try again.");
+                        }
+                      }
+                    }}>
+                      Submit
+                    &lt;/button>
+                    &lt;button className="delete-button" onClick={() => {
+                      setEditingPost(false);
+                      setEditPostText("");
+                    }}>
+                      Cancel
+                    &lt;/button>
+                  &lt;/div>
+                &lt;/>
+              ) : (
+                &lt;>
+                  &lt;p>{post.contents}&lt;/p>
+                  {post.isEdited &amp;&amp; &lt;div className="edited-icon">✎&lt;/div>}
+                  {post.userName === displayName &amp;&amp; post.contents !== "This post has been deleted" &amp;&amp; (
+                    &lt;div className="edit-delete-container" style={{ marginTop: "1rem" }}>
+                      &lt;button className="edit-button" onClick={() => {
+                        setEditingPost(true);
+                        setEditPostText(post.contents);
+                      }}>
+                        Edit
+                      &lt;/button>
+                      &lt;button className="delete-button" onClick={() => handleDelete(post.id)}>Delete&lt;/button>
+                    &lt;/div>
+                  )}
+                &lt;/>
+              )}
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+
+      {/* Replies */}
+      &lt;h2 className="news-title">Replies&lt;/h2>
+      {post.replies?.length > 0 ? (
+        &lt;>
+          &lt;div className="replies-wrapper">
+            &lt;div className="news-cards-container">
+              {currentReplies.map((reply) => (
+                &lt;div key={reply._id} className="news-card">
+                  &lt;div className="meta-container">
+                    &lt;p>{reply.userName}&lt;/p>
+                    {users[reply.userName]?.photoURL &amp;&amp; (
+                      &lt;img src={users[reply.userName].photoURL} alt={`${reply.userName}'s profile`} width={100} height={100} />
+                    )}
+                    &lt;p>{formatDate(reply.createdAt)}&lt;/p>
+                  &lt;/div>
+                  &lt;div className="news-card-content">
+                    {editingReplyId === reply._id ? (
+                      &lt;>
+                        &lt;textarea
+                          className="reply-textarea edit-reply-textarea"
+                          value={editReplyText}
+                          onChange={(e) => setEditReplyText(e.target.value)}
+                        />
+                        &lt;div className="edit-delete-container">
+                          &lt;button className="edit-button" onClick={() => handleEditSubmit(reply._id)}>Submit&lt;/button>
+                          &lt;button className="delete-button" onClick={handleEditCancel}>Cancel&lt;/button>
+                        &lt;/div>
+                      &lt;/>
+                    ) : (
+                      &lt;>
+                        &lt;p>{reply.contents}&lt;/p>
+                        &lt;div className="edit-delete-container">
+                          {reply.isEdited &amp;&amp; &lt;div className="edited-icon">✎&lt;/div>}
+                          {reply.userName === displayName &amp;&amp; reply.contents !== "This post has been deleted" &amp;&amp; (
+                            &lt;>
+                              &lt;button className="edit-button" onClick={() => handleEditClick(reply._id, reply.contents)}>Edit&lt;/button>
+                              &lt;button className="delete-button" onClick={() => handleDeleteReply(reply._id)}>Delete&lt;/button>
+                            &lt;/>
+                          )}
+                        &lt;/div>
+                      &lt;/>
+                    )}
+                  &lt;/div>
+                &lt;/div>
+              ))}
+            &lt;/div>
+          &lt;/div>
+
+          {/* Pagination */}
+          &lt;div className="pagination">
+            {currentPage > 1 &amp;&amp; (
+              &lt;button className="page-button" onClick={() => handlePageChange(currentPage - 1)}>Prev&lt;/button>
+            )}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((pageNum) =>
+                pageNum === 1 || pageNum === totalPages || (pageNum >= currentPage - 1 &amp;&amp; pageNum &lt;= currentPage + 2)
+              )
+              .map((pageNum) => (
+                &lt;button
+                  key={pageNum}
+                  className="page-button"
+                  onClick={() => handlePageChange(pageNum)}
+                  disabled={pageNum === currentPage}
+                >
+                  {pageNum}
+                &lt;/button>
+              ))}
+            {currentPage &lt; totalPages &amp;&amp; (
+              &lt;button className="page-button" onClick={() => handlePageChange(currentPage + 1)}>Next&lt;/button>
+            )}
+          &lt;/div>
+        &lt;/>
+      ) : (
+        &lt;p style={{ textAlign: "center", marginTop: "1rem" }}>No replies yet.&lt;/p>
+      )}
+
+      {/* Back Button */}
+      &lt;button
+        className="page-button"
+        onClick={() => navigate(-1)}
+        style={{ marginTop: "1rem", marginBottom: "2rem" }}
+      >
+        ← Back to Category
+      &lt;/button>
+
+      {/* Reply Form */}
+      &lt;div className="news-card-wrapper reply-form-wrapper">
+        &lt;div className="news-cards-container">
+          &lt;div className="news-card">
+            &lt;div className="news-card-content reply-form-content">
+              &lt;h3 className="reply-form-title">Post a Reply&lt;/h3>
+              &lt;textarea
+                className="reply-textarea"
+                placeholder="Write your reply here..."
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+              />
+              {errorMessage &amp;&amp; &lt;p style={{ color: "red", marginBottom: "1rem" }}>{errorMessage}&lt;/p>}
+              &lt;button className="page-button reply-submit-button" onClick={handleSubmitReply}>
+                Submit Reply
+              &lt;/button>
+            &lt;/div>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+export default ForumThread;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#App">App</a></li><li><a href="global.html#Category">Category</a></li><li><a href="global.html#Chat">Chat</a></li><li><a href="global.html#CommunityEventForm">CommunityEventForm</a></li><li><a href="global.html#CommunityEventPage">CommunityEventPage</a></li><li><a href="global.html#ContactForm">ContactForm</a></li><li><a href="global.html#ForumCategory">ForumCategory</a></li><li><a href="global.html#ForumLanding">ForumLanding</a></li><li><a href="global.html#ForumThread">ForumThread</a></li><li><a href="global.html#Login">Login</a></li><li><a href="global.html#Logout">Logout</a></li><li><a href="global.html#News">News</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#approveEvent">approveEvent</a></li><li><a href="global.html#auth">auth</a></li><li><a href="global.html#author">author</a></li><li><a href="global.html#container">container</a></li><li><a href="global.html#containsBannedWord">containsBannedWord</a></li><li><a href="global.html#content">content</a></li><li><a href="global.html#contents">contents</a></li><li><a href="global.html#createEvent">createEvent</a></li><li><a href="global.html#createNewsPost">createNewsPost</a></li><li><a href="global.html#createReply">createReply</a></li><li><a href="global.html#createdAt">createdAt</a></li><li><a href="global.html#date">date</a></li><li><a href="global.html#deleteAllPosts">deleteAllPosts</a></li><li><a href="global.html#deleteEvent">deleteEvent</a></li><li><a href="global.html#deleteNewsPost">deleteNewsPost</a></li><li><a href="global.html#deletePostById">deletePostById</a></li><li><a href="global.html#description">description</a></li><li><a href="global.html#displayName">displayName</a></li><li><a href="global.html#email">email</a></li><li><a href="global.html#emailVerified">emailVerified</a></li><li><a href="global.html#express">express</a></li><li><a href="global.html#filterApprovedEvents">filterApprovedEvents</a></li><li><a href="global.html#firebaseConfig">firebaseConfig</a></li><li><a href="global.html#fs">fs</a></li><li><a href="global.html#getAllCategories">getAllCategories</a></li><li><a href="global.html#getAllEvents">getAllEvents</a></li><li><a href="global.html#getAllNewsPosts">getAllNewsPosts</a></li><li><a href="global.html#getAllPosts">getAllPosts</a></li><li><a href="global.html#getEventById">getEventById</a></li><li><a href="global.html#getNewsPostById">getNewsPostById</a></li><li><a href="global.html#getPostsByCategory">getPostsByCategory</a></li><li><a href="global.html#getPostsById">getPostsById</a></li><li><a href="global.html#googleProvider">googleProvider</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#imageURL">imageURL</a></li><li><a href="global.html#isApproved">isApproved</a></li><li><a href="global.html#isEdited">isEdited</a></li><li><a href="global.html#isPinned">isPinned</a></li><li><a href="global.html#location">location</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#newsPostSchema">newsPostSchema</a></li><li><a href="global.html#photo">photo</a></li><li><a href="global.html#photoURL">photoURL</a></li><li><a href="global.html#postSchema">postSchema</a></li><li><a href="global.html#postedAt">postedAt</a></li><li><a href="global.html#providerId">providerId</a></li><li><a href="global.html#replies">replies</a></li><li><a href="global.html#replyCharacterLimit">replyCharacterLimit</a></li><li><a href="global.html#replyCharacterMin">replyCharacterMin</a></li><li><a href="global.html#replySchema">replySchema</a></li><li><a href="global.html#saveUser">saveUser</a></li><li><a href="global.html#shareToSocial">shareToSocial</a></li><li><a href="global.html#sortEventsAsc">sortEventsAsc</a></li><li><a href="global.html#sortEventsDesc">sortEventsDesc</a></li><li><a href="global.html#tags">tags</a></li><li><a href="global.html#thisSchema">thisSchema</a></li><li><a href="global.html#title">title</a></li><li><a href="global.html#uid">uid</a></li><li><a href="global.html#updateEvent">updateEvent</a></li><li><a href="global.html#updateForumPost">updateForumPost</a></li><li><a href="global.html#updateNewsPost">updateNewsPost</a></li><li><a href="global.html#updateReply">updateReply</a></li><li><a href="global.html#updatedAt">updatedAt</a></li><li><a href="global.html#userName">userName</a></li><li><a href="global.html#userPosted">userPosted</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat Apr 12 2025 14:41:37 GMT-0400 (Eastern Daylight Saving Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: server/controllers/postController.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: server/controllers/postController.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file Controller for handling forum post and reply operations.
+ * Includes logic for creating, reading, updating, and deleting posts and replies,
+ * along with banned word checks and category filtering.
+ */
+
+const Post = require('../models/post');
+const containsBannedWord = require('../utilities/checkBannedWords');
+
+// REST API
+
+/**
+ * Get all forum posts.
+ * @route GET /api/post
+ */
+exports.getAllPosts = async (req, res) => {
+  try {
+    const posts = await Post.find();
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/**
+ * Get a single post by UUID.
+ * @route GET /api/post/id/:postId
+ */
+exports.getPostsById = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const post = await Post.findOne({ id: postId });
+
+    if (!post) {
+      return res.status(404).json({ message: "No post found with this ID." });
+    }
+
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/**
+ * Get all posts within a specific category.
+ * @route GET /api/post/category/:category
+ */
+exports.getPostsByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+    const posts = await Post.find({ Category: category });
+
+    if (!posts.length) {
+      return res.status(404).json({ message: "No posts found for this category." });
+    }
+
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// CREATE forum post
+const { body, validationResult } = require('express-validator');
+const { v4: uuidv4 } = require('uuid');
+
+exports.createForumPost = [
+  body('contents').isString().notEmpty().withMessage('Contents are required'),
+  body('Category').optional().isString(),
+  body('isPinned').optional().isBoolean(),
+  body('isEdited').optional().isBoolean(),
+  body('replies').optional().isArray(),
+
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { userName, contents, Category, isEdited, isPinned, replies } = req.body;
+
+    if (containsBannedWord(contents)) {
+      return res.status(400).json({ error: "Your post contains banned word(s). Please remove them and try again." });
+    }
+
+    try {
+      const id = uuidv4();
+
+      const newPost = new Post({
+        id,
+        userName,
+        contents,
+        Category,
+        isEdited,
+        isPinned,
+        replies
+      });
+
+      const savedPost = await newPost.save();
+      res.status(201).json(savedPost);
+    } catch (error) {
+      console.error("Error creating forum post:", error);
+      res.status(500).json({ error: "Failed to create forum post" });
+    }
+  }
+];
+
+/**
+ * Update the contents of a forum post.
+ * @route PUT /api/post/id/:postId
+ * @bodyParam {string} [contents]
+ * @bodyParam {boolean} [isEdited]
+ */
+exports.updateForumPost = [
+  body('contents').optional().isString().withMessage('Contents must be a string'),
+  body('isEdited').optional().isBoolean().withMessage('isEdited must be a boolean'),
+
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { contents } = req.body;
+
+    if (contents &amp;&amp; containsBannedWord(contents)) {
+      return res.status(400).json({ error: "Your post contains banned word(s). Please remove them and try again." });
+    }
+
+    try {
+      const { postId } = req.params;
+      const post = await Post.findOne({ id: postId });
+
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
+
+      if (contents !== undefined) {
+        post.contents = contents;
+        post.isEdited = true;
+      }
+
+      const updatedPost = await post.save();
+      res.status(200).json(updatedPost);
+    } catch (error) {
+      console.error("Error updating:", error);
+      res.status(500).json({ error: 'Failed to update' });
+    }
+  }
+];
+
+/**
+ * Create a reply to a forum post.
+ * @route POST /api/post/:postId/reply
+ * @bodyParam {string} userName
+ * @bodyParam {string} contents
+ */
+exports.createReply = [
+  body('contents').isString().notEmpty().withMessage('Reply cannot be empty'),
+
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { userName, contents } = req.body;
+    const { postId } = req.params;
+
+    if (containsBannedWord(contents)) {
+      return res.status(400).json({ error: "Your reply contains banned word(s). Please remove them and try again." });
+    }
+
+    try {
+      const post = await Post.findOne({ id: postId });
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+
+      const newReply = {
+        userName,
+        contents,
+        isEdited: false,
+      };
+
+      post.replies.push(newReply);
+      const updatedPost = await post.save();
+
+      res.status(201).json(updatedPost);
+    } catch (error) {
+      console.error("Error creating reply:", error);
+      res.status(500).json({ error: "Failed to create reply" });
+    }
+  }
+];
+
+/**
+ * Update a reply on a post.
+ * @route PUT /api/post/id/:postId/reply/:replyId
+ * @bodyParam {string} [contents]
+ */
+exports.updateReply = [
+  body('contents').optional().isString().withMessage('Reply content must be a string'),
+
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { contents } = req.body;
+    const { postId, replyId } = req.params;
+
+    if (contents &amp;&amp; containsBannedWord(contents)) {
+      return res.status(400).json({ error: "Your reply contains banned word(s). Please remove them and try again." });
+    }
+
+    try {
+      const post = await Post.findOne({ id: postId });
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+
+      const reply = post.replies.id(replyId);
+      if (!reply) {
+        return res.status(404).json({ message: "Reply not found" });
+      }
+
+      if (contents !== undefined) {
+        reply.contents = contents;
+        reply.isEdited = true;
+      }
+
+      const updatedPost = await post.save();
+      res.status(200).json(updatedPost);
+    } catch (error) {
+      console.error("Error updating reply:", error);
+      res.status(500).json({ error: "Failed to update reply" });
+    }
+  }
+];
+
+
+/**
+ * Delete a single forum post by UUID.
+ * @route DELETE /api/forum/id/:id
+ */
+exports.deletePostById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedPost = await Post.findOneAndDelete({ id });
+
+    if (!deletedPost) {
+      return res.status(404).json({ message: "Post not found." });
+    }
+
+    res.status(200).json({ message: "Post deleted successfully." });
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting post.", error: err.message });
+  }
+};
+
+/**
+ * Delete all forum posts.
+ * @route DELETE /api/forum
+ */
+exports.deleteAllPosts = async (req, res) => {
+  try {
+    const result = await Post.deleteMany({});
+    res.status(200).json({ message: `Deleted ${result.deletedCount} post(s).` });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete posts.", error: err.message });
+  }
+};
+
+/**
+ * Get all unique forum post categories.
+ * @route GET /api/forum/categories
+ */
+exports.getAllCategories = async (req, res) => {
+  try {
+    const posts = await Post.find().select("Category -_id");
+    const categories = [...new Set(posts.map(post => post.Category))];
+    res.json(categories);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#App">App</a></li><li><a href="global.html#Category">Category</a></li><li><a href="global.html#Chat">Chat</a></li><li><a href="global.html#CommunityEventForm">CommunityEventForm</a></li><li><a href="global.html#CommunityEventPage">CommunityEventPage</a></li><li><a href="global.html#ContactForm">ContactForm</a></li><li><a href="global.html#ForumCategory">ForumCategory</a></li><li><a href="global.html#ForumLanding">ForumLanding</a></li><li><a href="global.html#ForumThread">ForumThread</a></li><li><a href="global.html#Login">Login</a></li><li><a href="global.html#Logout">Logout</a></li><li><a href="global.html#News">News</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#approveEvent">approveEvent</a></li><li><a href="global.html#auth">auth</a></li><li><a href="global.html#author">author</a></li><li><a href="global.html#container">container</a></li><li><a href="global.html#containsBannedWord">containsBannedWord</a></li><li><a href="global.html#content">content</a></li><li><a href="global.html#contents">contents</a></li><li><a href="global.html#createEvent">createEvent</a></li><li><a href="global.html#createNewsPost">createNewsPost</a></li><li><a href="global.html#createReply">createReply</a></li><li><a href="global.html#createdAt">createdAt</a></li><li><a href="global.html#date">date</a></li><li><a href="global.html#deleteAllPosts">deleteAllPosts</a></li><li><a href="global.html#deleteEvent">deleteEvent</a></li><li><a href="global.html#deleteNewsPost">deleteNewsPost</a></li><li><a href="global.html#deletePostById">deletePostById</a></li><li><a href="global.html#description">description</a></li><li><a href="global.html#displayName">displayName</a></li><li><a href="global.html#email">email</a></li><li><a href="global.html#emailVerified">emailVerified</a></li><li><a href="global.html#express">express</a></li><li><a href="global.html#filterApprovedEvents">filterApprovedEvents</a></li><li><a href="global.html#firebaseConfig">firebaseConfig</a></li><li><a href="global.html#fs">fs</a></li><li><a href="global.html#getAllCategories">getAllCategories</a></li><li><a href="global.html#getAllEvents">getAllEvents</a></li><li><a href="global.html#getAllNewsPosts">getAllNewsPosts</a></li><li><a href="global.html#getAllPosts">getAllPosts</a></li><li><a href="global.html#getEventById">getEventById</a></li><li><a href="global.html#getNewsPostById">getNewsPostById</a></li><li><a href="global.html#getPostsByCategory">getPostsByCategory</a></li><li><a href="global.html#getPostsById">getPostsById</a></li><li><a href="global.html#googleProvider">googleProvider</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#imageURL">imageURL</a></li><li><a href="global.html#isApproved">isApproved</a></li><li><a href="global.html#isEdited">isEdited</a></li><li><a href="global.html#isPinned">isPinned</a></li><li><a href="global.html#location">location</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#newsPostSchema">newsPostSchema</a></li><li><a href="global.html#photo">photo</a></li><li><a href="global.html#photoURL">photoURL</a></li><li><a href="global.html#postSchema">postSchema</a></li><li><a href="global.html#postedAt">postedAt</a></li><li><a href="global.html#providerId">providerId</a></li><li><a href="global.html#replies">replies</a></li><li><a href="global.html#replyCharacterLimit">replyCharacterLimit</a></li><li><a href="global.html#replyCharacterMin">replyCharacterMin</a></li><li><a href="global.html#replySchema">replySchema</a></li><li><a href="global.html#saveUser">saveUser</a></li><li><a href="global.html#shareToSocial">shareToSocial</a></li><li><a href="global.html#sortEventsAsc">sortEventsAsc</a></li><li><a href="global.html#sortEventsDesc">sortEventsDesc</a></li><li><a href="global.html#tags">tags</a></li><li><a href="global.html#thisSchema">thisSchema</a></li><li><a href="global.html#title">title</a></li><li><a href="global.html#uid">uid</a></li><li><a href="global.html#updateEvent">updateEvent</a></li><li><a href="global.html#updateForumPost">updateForumPost</a></li><li><a href="global.html#updateNewsPost">updateNewsPost</a></li><li><a href="global.html#updateReply">updateReply</a></li><li><a href="global.html#updatedAt">updatedAt</a></li><li><a href="global.html#userName">userName</a></li><li><a href="global.html#userPosted">userPosted</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat Apr 12 2025 14:41:37 GMT-0400 (Eastern Daylight Saving Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

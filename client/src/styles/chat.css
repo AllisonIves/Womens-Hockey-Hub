@@ -1,0 +1,214 @@
+/* WHH Color Variables */
+:root {
+    --WHH-Blue: #003049;
+    --WHH-Red: #c1121F;
+    --WHH-Light-Blue: #669BBC;
+    --WHH-Gray: #EBEDF0;
+}
+
+/* Wrapper to align chat and user list side by side */
+.chat-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    height: 80vh;
+    align-items: center;
+    margin-top: 60px;
+}
+
+/* Chat Box */
+.chat-container {
+    flex-grow: 1;
+    max-width: 600px;
+    height: 70vh;
+    padding: 15px;
+    border: 2px solid var(--WHH-Blue);
+    border-radius: 10px;
+    background-color: var(--WHH-Gray);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    background-image: url("../assets/Hockey.png");
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Add a semi-transparent overlay to keep text clear */
+.chat-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.95);
+    z-index: 1;
+}
+
+/* Chat Title*/
+.chat-container h2 {
+    position: relative;
+    z-index: 3;
+    color: var(--WHH-Blue);
+    font-weight: bold;
+    text-align: left;
+    font-size: 1.8rem;
+    padding-bottom: 8px;
+}
+
+.messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+    border-bottom: 2px solid var(--WHH-Blue);
+    max-height: calc(80vh - 60px);
+    position: relative;
+    z-index: 2;
+}
+
+/* Individual Chat Message */
+.message {
+    display: flex;
+    max-width: 75%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    font-weight: normal;
+    word-wrap: break-word;
+    clear: both;
+    margin-bottom: 6px;
+}
+
+/* Your Messages (Right-Aligned) */
+.message.you {
+    background-color: var(--WHH-Light-Blue);
+    color: white;
+    text-align: right;
+    border-top-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    align-self: flex-end;
+    justify-content: flex-end;
+    margin-left: auto;
+}
+
+/* Other Users' Messages (Left-Aligned) */
+.message.other {
+    background-color: var(--WHH-Gray);
+    color: var(--WHH-Blue);
+    text-align: left;
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    align-self: flex-start;
+    justify-content: flex-start;
+    margin-right: auto;
+}
+
+.user-list-container {
+    width: 200px;
+    height: 70vh;
+    padding: 10px;
+    border: 2px solid var(--WHH-Blue);
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* User List Title */
+.user-list-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+    color: var(--WHH-Blue);
+}
+
+/* User List Items */
+.user-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.user-list li {
+    padding: 8px;
+    border-bottom: 1px solid var(--WHH-Light-Blue);
+}
+
+/* Last Item No Border */
+.user-list li:last-child {
+    border-bottom: none;
+}
+
+.message-input-container {
+    width: 60%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding-top: 10px;
+}
+
+/* Message Input Form */
+.message-form {
+    display: flex;
+    gap: 10px;
+}
+
+/* Message Input Field */
+.message-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 2px solid var(--WHH-Blue);
+    border-radius: 5px;
+    background-color: white;
+}
+
+/* Send Button */
+.send-button {
+    padding: 10px 15px;
+    border: none;
+    background-color: var(--WHH-Red);
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.send-button:hover {
+    background-color: var(--WHH-Light-Blue);
+}
+
+/* Room Number Styling */
+.room-info-visible {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--WHH-Blue);
+    margin-top: 20px;
+    margin: 8px 0;
+    padding: 0;
+  }
+
+  .chat-lobby {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+  }
+  
+  .chat-lobby .page-button {
+    background-color: var(--WHH-Red);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .chat-lobby .page-button:hover {
+    background-color: #a40f1b;
+  }
+  
